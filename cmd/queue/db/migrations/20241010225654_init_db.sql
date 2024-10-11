@@ -1,12 +1,11 @@
 -- migrate:up
 
--- GORM assumes QueueJobs as a model will be mapped to
--- queue_jobs as a table name. Convention is easy.
 CREATE TABLE IF NOT EXISTS queue_jobs
 (
-    uuid UUID PRIMARY KEY,
-    time_inserted      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    payload            JSON
+    job_id              UUID PRIMARY KEY NOT NULl,
+    time_inserted       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    domain              TEXT NOT NULL,
+    page                TEXT
 );
 
 CREATE INDEX time_inserted_idx

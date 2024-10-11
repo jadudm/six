@@ -8,6 +8,10 @@ run:
 	go run main.go
 
 # Migrations
+wipe:
+	rm -f db/queue.sqlite
+	dbmate -u "sqlite:db/queue.sqlite" up
+
 up:
 	dbmate -u "sqlite:db/queue.sqlite" up
 down:

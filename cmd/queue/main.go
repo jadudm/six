@@ -2,22 +2,24 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"golang.org/x/sync/semaphore"
-
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/sync/semaphore"
 )
 
-var _DB *gorm.DB
+var _DB *sql.DB
 
 func load_dotenv() {
 	// https://github.com/joho/godotenv
@@ -27,38 +29,32 @@ func load_dotenv() {
 	}
 }
 
-// https://stackoverflow.com/questions/64780409/can-i-use-go-gorm-with-mysql-json-type-field
-type QueueJob struct {
-	// gorm.Model
-	Action  string            `json:"action" gorm:"-:all"`
-	UUID    string            `json:"uuid"`
-	Payload map[string]string `json:"payload" gorm:"serializer:json"`
-}
+func load_db() {
+	db, err := sql.Open("sqlite3", os.Getenv("DATABASE_PATH"))
+	if err != nil {
+		fmt.Println(err)
+		panic("COULD NOT OPEN DATABASE")
+	}
+	_DB = db
 
-func (qj *QueueJob) Render(w http.ResponseWriter, r *http.Request) error {
-	// Pre-processing before a response is marshalled and sent across the wire
-	return nil
 }
 
 // Handler functions
 func enqueue(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	domain := chi.URLParam(r, "domain")
-	job := map[string]string{"crawl": domain}
+	sql, args, _ := squirrel.
+		Insert("queue_jobs").Columns("job_id", "domain").
+		Values(uuid.NewString(), domain).
+		ToSql()
 
-	qj := &QueueJob{
-		Action:  "enqueue",
-		UUID:    string(uuid.NewString()),
-		Payload: job,
+	_, err := _DB.Exec(sql, args...)
+	if err != nil {
+		log.Println(err)
+		panic("SQL")
 	}
-
-	// Returns a DB pointer for chaining.
-	_DB.Create(&qj)
-
-	if err := render.Render(w, r, qj); err != nil {
-		render.Render(w, r, ErrRender(err))
-		return
-	}
-
+	duration := time.Since(start)
+	render.DefaultResponder(w, r, render.M{"result": "ok", "elapsed": duration})
 }
 
 var sem = semaphore.NewWeighted(int64(1))
@@ -66,26 +62,34 @@ var sem = semaphore.NewWeighted(int64(1))
 func dequeue(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	sem.Acquire(ctx, 1)
-	var qj *QueueJob
-	result := _DB.Order("time_inserted ASC").Limit(1).Find(&qj)
-	if result.Error == nil {
-		// Delete if we found no errors
-		_DB.Where("uuid = ?", qj.UUID).Delete(&QueueJob{})
-	}
-	sem.Release(1)
-	qj.Action = "dequeue"
-	if err := render.Render(w, r, qj); err != nil {
-		render.Render(w, r, ErrRender(err))
-		return
-	}
-}
+	// http://go-database-sql.org/modifying.html
+	// rows, err := _DB.Query("SELECT * FROM queue_jobs ORDER BY time_inserted ASC")
+	// if err != nil {
+	// 	panic("COULD NOT QUERY QUEUE")
+	// }
+	// Just grab the first row.
+	// Next() must be called at least once.
+	// stmt := QueueJobs.SELECT(QueueJobs.AllColumns).ORDER_BY(QueueJobs.TimeInserted.ASC()).LIMIT(1)
+	// var qj QueueJob
+	// var qjs []QueueJob
+	// err = scan.Rows(&qjs, rows) //&qj.UUID, &js)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	panic("COULD NOT SCAN ROWS")
+	// }
 
-func load_db() {
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DATABASE_PATH")), &gorm.Config{})
-	if err != nil {
-		panic("COULD NOT OPEN DATABASE")
-	}
-	_DB = db
+	// defer rows.Close()
+
+	// qj = qjs[0]
+	// if err == nil {
+	// 	// Delete if we found no errors
+	// 	//_DB.Where("uuid = ?", qj.UUID).Delete(&QueueJob{})
+	// }
+	sem.Release(1)
+	// if err := render.Render(w, r, &qj); err != nil {
+	// 	render.Render(w, r, ErrRender(err))
+	// 	return
+	// }
 }
 
 // ErrResponse renderer type for handling all sorts of errors.
