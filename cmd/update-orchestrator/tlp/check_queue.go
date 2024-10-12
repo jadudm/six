@@ -1,6 +1,7 @@
 package tlp
 
 import (
+	"fmt"
 	"time"
 
 	GTST "com.jadud.search.six/pkg/types"
@@ -39,7 +40,7 @@ func checkQueue() {
 // 	return "check_queue() NEVER GETS HERE"
 // }
 
-func CheckQueue(crontab string, ch_msg chan<- GTST.JSON) {
+func CheckQueue(queue string, crontab string, ch_msg chan<- GTST.JSON) {
 	client := resty.New()
 
 	// c := cron.New()
@@ -60,7 +61,7 @@ func CheckQueue(crontab string, ch_msg chan<- GTST.JSON) {
 		resp, err := client.R().
 			EnableTrace().
 			//FIXME variable/vcap
-			Get("http://localhost:6000/dequeue/head")
+			Get(fmt.Sprintf("http://localhost:6000/dequeue/%s", queue))
 		if err != nil {
 			panic("DEQUEUE FAILED")
 		}

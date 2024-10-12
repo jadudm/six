@@ -28,15 +28,16 @@ func main() {
 	load_dotenv()
 
 	ch_q_out := make(chan GSTS.JSON)
-	// ch_sm_bh := make(chan GSTS.JSON)
-	//ch_bh := make(chan GSTS.JSON)
+	//ch_sm_bh := make(chan GSTS.JSON)
+	ch_bh := make(chan GSTS.JSON)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go tlp.CheckQueue("@every 1m", ch_q_out)
+	go tlp.CheckQueue("HEAD", "@every 1m", ch_q_out)
 	//go tlp.ShowMsg(ch_q_out, ch_sm_bh)
-	go tlp.NoisyBlackHole[GSTS.JSON](ch_q_out)
+	go tlp.HeadCheck(ch_q_out, ch_bh)
+	go tlp.NoisyBlackHole[GSTS.JSON](ch_bh)
 
 	wg.Wait()
 	log.Println("we will never see this")

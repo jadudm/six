@@ -225,12 +225,6 @@ func main() {
 	}
 }
 
-// I'm the update-orchestrator.
-// That means I do the following:
-// 1. Check the HEAD queue for incoming jobs (these could be domains or pages... does not matter)
-// 2. Depending on whether it is HTML/PDF/etc., put it on the right indexer queue.
-// 3. Indexers pull work from their queues. They both walk for links (back to HEAD), or
-//    they pull content and send it to the DB.
 
 /* Cutting room floor */
 // For parsing

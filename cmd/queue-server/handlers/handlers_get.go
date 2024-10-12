@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -11,21 +10,13 @@ import (
 	"github.com/go-chi/render"
 )
 
-type jm = map[string]interface{}
-
-func toMap(msg GTST.JSON) jm {
-	var data interface{}
-	json.Unmarshal(msg, &data)
-	return data.(jm)
-}
-
 // Broken out for testing.
 func getDequeueHandler(queue string) (jm, error) {
 	if Q.Length(queue) > 0 {
-		msg := toMap(Q.Dequeue(queue))
+		msg := GTST.ToMap(Q.Dequeue(queue))
 		return msg, nil
 	} else {
-		msg := toMap([]byte("{}"))
+		msg := GTST.ToMap([]byte("{}"))
 		return msg, errors.New("EMPTY")
 	}
 }
@@ -38,11 +29,13 @@ func GetDequeueHandler(w http.ResponseWriter, r *http.Request) {
 
 	duration := time.Since(start)
 	if err == nil {
-		render.DefaultResponder(w, r, render.M{
-			"result":  "ok",
-			"domain":  msg["domain"],
-			"elapsed": duration,
-		})
+		sendMap := make(render.M, 0)
+		sendMap["result"] = "ok"
+		sendMap["elapsed"] = "duration"
+		for k, v := range msg {
+			sendMap[k] = v
+		}
+		render.DefaultResponder(w, r, sendMap)
 	} else {
 		render.DefaultResponder(w, r, render.M{
 			"result":  "error",
