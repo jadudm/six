@@ -59,9 +59,25 @@ func enqueue(w http.ResponseWriter, r *http.Request) {
 
 var sem = semaphore.NewWeighted(int64(1))
 
+type Job struct {
+	JobId  string `sql:"job_id"`
+	Domain string `sql:"domain"`
+	Page   string `sql:"page"`
+}
+
 func dequeue(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	sem.Acquire(ctx, 1)
+	sql, args, err := squirrel.Select("*").From("queue_jobs").OrderBy("time_inserted").Limit(1).ToSql()
+	rows, err = _DB.Query(sql, args...)
+	if err != nil {
+		log.Println(sql)
+		panic("COULD NOT QUERY QUEUE")
+
+	}
+
+	rows.Next()
+
 	// http://go-database-sql.org/modifying.html
 	// rows, err := _DB.Query("SELECT * FROM queue_jobs ORDER BY time_inserted ASC")
 	// if err != nil {
@@ -90,34 +106,6 @@ func dequeue(w http.ResponseWriter, r *http.Request) {
 	// 	render.Render(w, r, ErrRender(err))
 	// 	return
 	// }
-}
-
-// ErrResponse renderer type for handling all sorts of errors.
-//
-// In the best case scenario, the excellent github.com/pkg/errors package
-// helps reveal information on the error, setting it on Err, and in the Render()
-// method, using it to set the application-specific error code in AppCode.
-type ErrResponse struct {
-	Err            error `json:"-"` // low-level runtime error
-	HTTPStatusCode int   `json:"-"` // http response status code
-
-	StatusText string `json:"status"`          // user-level status message
-	AppCode    int64  `json:"code,omitempty"`  // application-specific error code
-	ErrorText  string `json:"error,omitempty"` // application-level error message, for debugging
-}
-
-func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	render.Status(r, e.HTTPStatusCode)
-	return nil
-}
-
-func ErrRender(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: 422,
-		StatusText:     "Error rendering response.",
-		ErrorText:      err.Error(),
-	}
 }
 
 func main() {
