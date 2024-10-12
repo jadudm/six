@@ -2,17 +2,16 @@ build:
 	go build -o ../../bin/queue.exe
 
 test:
-	go test
+	go test handlers/*.go -v
 
 run:
-	go run main.go
+	go run *.go
+
+check:
+	staticcheck
 
 # Migrations
-wipe:
-	rm -f db/queue.sqlite
-	dbmate -u "sqlite:db/queue.sqlite" up
-
-up:
-	dbmate -u "sqlite:db/queue.sqlite" up
-down:
-	dbmate -u "sqlite:db/queue.sqlite" down
+# up:
+# 	dbmate -u "sqlite:db/queue.sqlite" up
+# down:
+# 	dbmate -u "sqlite:db/queue.sqlite" down

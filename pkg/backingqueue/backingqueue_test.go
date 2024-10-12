@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func setupTest[T any](t *testing.T) (func(t *testing.T), *BQ[T]) {
@@ -41,7 +41,7 @@ func TestInsertIntoQueue(t *testing.T) {
 		Cron:     "*/1 0 0 0 0",
 	})
 	bq.NewQueue("alice")
-	bq.Push("alice", 1)
+	bq.Enqueue("alice", 1)
 	assert.Equal(t, bq.IsEmpty("alice"), false)
 }
 
@@ -52,9 +52,9 @@ func TestInsertIntoTwoQueues(t *testing.T) {
 	})
 	bq.NewQueue("alice")
 	bq.NewQueue("bob")
-	bq.Push("alice", 1)
-	bq.Push("alice", 2)
-	bq.Push("bob", 1)
+	bq.Enqueue("alice", 1)
+	bq.Enqueue("alice", 2)
+	bq.Enqueue("bob", 1)
 	assert.Equal(t, bq.Length("alice"), 2)
 	assert.Equal(t, bq.Length("bob"), 1)
 }
@@ -68,7 +68,7 @@ func TestInsertStruct(t *testing.T) {
 		Cron:     "*/1 0 0 0 0",
 	})
 	bq.NewQueue("alice")
-	bq.Push("alice", meaning{life: 1})
+	bq.Enqueue("alice", meaning{life: 1})
 	assert.Equal(t, bq.IsEmpty("alice"), false)
 }
 
@@ -81,8 +81,8 @@ func TestRetrieveStruct(t *testing.T) {
 		Cron:     "*/1 0 0 0 0",
 	})
 	bq.NewQueue("alice")
-	bq.Push("alice", meaning{life: 42})
-	f := bq.Pop("alice")
+	bq.Enqueue("alice", meaning{life: 42})
+	f := bq.Dequeue("alice")
 	assert.Equal(t, f.life, 42)
 }
 
@@ -92,8 +92,8 @@ func TestSave(t *testing.T) {
 		Cron:     "@every 1m",
 	})
 	bq.NewQueue("alice")
-	bq.Push("alice", 1)
-	bq.Push("alice", 2)
+	bq.Enqueue("alice", 1)
+	bq.Enqueue("alice", 2)
 	assert.Equal(t, bq.IsEmpty("alice"), false)
 	bq.Save("alice")
 }
@@ -108,8 +108,8 @@ func TestSaveStruct(t *testing.T) {
 		Cron:     "*/1 0 0 0 0",
 	})
 	bq.NewQueue("beatrice")
-	bq.Push("beatrice", meaning{Life: 1})
-	bq.Push("beatrice", meaning{Life: 2})
+	bq.Enqueue("beatrice", meaning{Life: 1})
+	bq.Enqueue("beatrice", meaning{Life: 2})
 	assert.Equal(t, bq.IsEmpty("beatrice"), false)
 	bq.Save("beatrice")
 	// https://stackoverflow.com/questions/12518876/how-to-check-if-a-file-exists-in-go
