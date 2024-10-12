@@ -1,5 +1,5 @@
 build:
-	go build -o ../../bin/queue.exe
+	go build -o ../../bin/queue-server.exe
 
 test:
 	go test handlers/*.go -v

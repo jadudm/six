@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	handle "com.jadud.search.six/cmd/queue/handlers"
+	handle "com.jadud.search.six/cmd/queue-server/handlers"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -25,25 +25,27 @@ func load_dotenv() {
 func main() {
 	load_dotenv()
 	r := chi.NewRouter()
-	handle.Init("/tmp/queue-backup", "*/1 0 0 0 0")
+	//FIXME load the path from a config/env var
+	handle.Init("/tmp/queue-backup", "@every 1m")
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	// This eats {domain} dots. Eg. `foo.com` becomes `foo`.
+	// This router eats {domain} dots. Eg. `foo.com` becomes `foo`.
 	// r.Use(middleware.URLFormat)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("queue six"))
+		w.Write([]byte("queue-server"))
 	})
 
-	r.Put("/enqueue/{domain}", handle.PutEnqueueHandler)
-	r.Get("/dequeue", handle.GetDequeueHandler)
+	r.Put("/enqueue/{queue}", handle.PutEnqueueHandler)
+	r.Get("/dequeue/{queue}", handle.GetDequeueHandler)
 
 	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))
 	})
 
+	// FIXME: Either env var or config/vcap
 	http.ListenAndServe(":"+os.Getenv("PORT"), r)
 }

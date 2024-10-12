@@ -1,15 +1,17 @@
 package backingqueue
 
 import (
-	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/edwingeng/deque/v2"
 	"github.com/robfig/cron/v3"
-	"golang.org/x/exp/utf8string"
 )
+
+var IsSafeQueueName = regexp.MustCompile(`^[a-zA-Z-_]+$`).MatchString
 
 type qMap[T any] map[string]*deque.Deque[T]
 
@@ -30,12 +32,25 @@ type FileSaveConfig[T any] struct {
 }
 
 func (fsc *FileSaveConfig[T]) Save(qc BQ[T]) {
+
 	os.MkdirAll(fsc.FilePath, 0755)
 	for name, q := range qc.Queues {
+		// log.Println("Saving queue:", name)
 		raw := q.Dump()
-		data, _ := json.MarshalIndent(raw, "", " ")
 		dest := filepath.Join(fsc.FilePath, fmt.Sprintf("%s.json", name))
-		_ = os.WriteFile(dest, data, 0644)
+		f, err := os.Create(dest)
+		if err != nil {
+			log.Panic("cannot create queue log")
+		}
+		defer f.Close()
+		f.WriteString("[\n")
+
+		for _, o := range raw {
+			f.WriteString("  " + fmt.Sprintf("%s", o))
+			f.WriteString("\n")
+		}
+
+		f.WriteString("]\n")
 
 	}
 }
@@ -58,12 +73,16 @@ func NewBackingQueue[T any](sc SaveConfig[T]) *BQ[T] {
 }
 
 func (qc BQ[T]) NewQueue(name string) {
-	if utf8string.NewString(name).IsASCII() {
+
+	// Make sure we're only ASCII for queue names
+	//if utf8string.NewString(name).IsASCII() {
+	if IsSafeQueueName(name) && (len(name) < 256) {
+		// Only create the queue once
 		if _, ok := qc.Queues[name]; !ok {
 			qc.Queues[name] = deque.NewDeque[T]()
+			qc.cron.AddFunc(qc.SC.GetFrequency(), func() { qc.SC.Save(qc) })
+			qc.cron.Start()
 		}
-		qc.cron.AddFunc(qc.SC.GetFrequency(), func() { qc.SC.Save(qc) })
-		qc.cron.Start()
 	}
 }
 
@@ -84,6 +103,9 @@ func (qc BQ[T]) Dequeue(name string) T {
 }
 
 func (qc BQ[T]) Length(name string) int {
+	if _, ok := qc.Queues[name]; !ok {
+		return -1
+	}
 	return qc.Queues[name].Len()
 }
 

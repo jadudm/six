@@ -11,10 +11,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/go-resty/resty/v2"
 	"github.com/gocolly/colly"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
@@ -78,13 +76,14 @@ func (qj *HtmlIndex) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func load_html_db(hi *HtmlIndex) *sql.DB {
-	pool := make(map[string]*sql.DB, 0)
+var pool = make(map[string]*sql.DB, 0)
 
-	sqldb, ok := pool[hi.Host]
+func load_html_db(hi *HtmlIndex) *sql.DB {
+
+	_, ok := pool[hi.Host]
 
 	if ok {
-		return sqldb
+		return pool[hi.Host]
 	} else {
 		db_name := strings.ReplaceAll(hi.Host, ".", "_")
 		template_path := "db"
@@ -148,7 +147,7 @@ func index_html(ch_content <-chan *HtmlIndex) {
 
 // crawl -> parse -> store
 func parse_html(ch_in <-chan *HtmlIndex, ch_out chan<- *HtmlIndex) {
-	for EVER {
+	for {
 		hi := <-ch_in
 		doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(hi.r.Body))
 		// hi.Text = doc.Text()
@@ -192,7 +191,7 @@ func crawl(host string, to_parse chan<- *HtmlIndex) {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		// fmt.Printf("Finished scraping %s\n", r.Request.URL)
+		fmt.Printf("Finished scraping %s\n", r.Request.URL)
 		if strings.Contains(r.Headers.Get("Content-Type"), "text/html") {
 			total_bytes += int64(len(r.Body))
 			the_url := r.Request.URL
@@ -209,61 +208,29 @@ func crawl(host string, to_parse chan<- *HtmlIndex) {
 	c.Visit(fmt.Sprintf("https://%s", host))
 }
 
-type QueueJob struct {
-	Action  string            `json:"action"`
-	UUID    string            `json:"uuid"`
-	Payload map[string]string `json:"payload"`
-}
-
-func check_queue() string {
-	client := resty.New()
-	var counter int64 = 0
-
-	for EVER {
-		time.Sleep(time.Duration(QUEUE_CHECK_FREQUENCY) * time.Second)
-		qj := &QueueJob{}
-		resp, err := client.R().
-			EnableTrace().
-			SetResult(&qj).
-			Get("http://localhost:6000/dequeue")
-		if err != nil {
-			panic("RESTY COULD NOT GET A JOB")
-		}
-
-		// If we got a UUID, we must be ready to do some work.
-		// Break the loop and go!
-		if qj.UUID != "" {
-			log.Println("QJ", qj)
-			// Return the host from the payload
-			// More checking would be nice.
-			return qj.Payload["crawl"]
-		}
-
-		log.Println("GET Response:", resp.Status())
-		log.Println("GET Body:", string(resp.Body()))
-		counter += 1
-		log.Printf("Empty job. Counting sheep: %d\n", counter)
-	}
-
-	return "check_queue() NEVER GETS HERE"
-}
-
 func main() {
 	load_dotenv()
-	ch_c2p := make(chan *HtmlIndex)
-	ch_p2i := make(chan *HtmlIndex)
-
 	// var wg sync.WaitGroup
-	for EVER {
-		host := check_queue()
-		go func() {
-			log.Println("CRAWLING", host)
-			go crawl(host, ch_c2p)
-			go parse_html(ch_c2p, ch_p2i)
-			go index_html(ch_p2i)
-		}()
+	for {
+		// host := check_queue()
+		// go func() {
+		// 	ch_c2p := make(chan *HtmlIndex)
+		// 	ch_p2i := make(chan *HtmlIndex)
+
+		// 	log.Println("CRAWLING", host)
+		// 	go crawl(host, ch_c2p)
+		// 	go parse_html(ch_c2p, ch_p2i)
+		// 	go index_html(ch_p2i)
+		// }()
 	}
 }
+
+// I'm the update-orchestrator.
+// That means I do the following:
+// 1. Check the HEAD queue for incoming jobs (these could be domains or pages... does not matter)
+// 2. Depending on whether it is HTML/PDF/etc., put it on the right indexer queue.
+// 3. Indexers pull work from their queues. They both walk for links (back to HEAD), or
+//    they pull content and send it to the DB.
 
 /* Cutting room floor */
 // For parsing

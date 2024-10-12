@@ -1,33 +1,46 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
 
-	. "com.jadud.search.six/pkg/types"
-
+	GTST "com.jadud.search.six/pkg/types"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
+type jm = map[string]interface{}
+
+func toMap(msg GTST.JSON) jm {
+	var data interface{}
+	json.Unmarshal(msg, &data)
+	return data.(jm)
+}
+
 // Broken out for testing.
-func getDequeueHandler() (Job, error) {
-	if TheMultiqueue.Length(TheQueue) > 0 {
-		return TheMultiqueue.Dequeue(TheQueue), nil
+func getDequeueHandler(queue string) (jm, error) {
+	if Q.Length(queue) > 0 {
+		msg := toMap(Q.Dequeue(queue))
+		return msg, nil
 	} else {
-		return Job{}, errors.New("EMPTY")
+		msg := toMap([]byte("{}"))
+		return msg, errors.New("EMPTY")
 	}
 }
 
 func GetDequeueHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("Dequeueing")
 	start := time.Now()
-	job, err := getDequeueHandler()
+	queue := chi.URLParam(r, "queue")
+	msg, err := getDequeueHandler(queue)
+
 	duration := time.Since(start)
 	if err == nil {
 		render.DefaultResponder(w, r, render.M{
 			"result":  "ok",
-			"domain":  job.Domain,
+			"domain":  msg["domain"],
 			"elapsed": duration,
 		})
 	} else {

@@ -8,16 +8,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTest[T any](t *testing.T) (func(t *testing.T), *BQ[T]) {
-	// log.Println("setup test")
+// func setupTest[T any](t *testing.T) (func(t *testing.T), *BQ[T]) {
+// 	// log.Println("setup test")
 
-	return func(t *testing.T) {
-			// log.Println("teardown test")
-		}, NewBackingQueue[T](&FileSaveConfig[T]{
-			FilePath: "test_data",
-			Cron:     "*/1 0 0 0 0",
-		})
-}
+// 	return func(t *testing.T) {
+// 			// log.Println("teardown test")
+// 		}, NewBackingQueue[T](&FileSaveConfig[T]{
+// 			FilePath: "test_data",
+// 			Cron:     "*/1 0 0 0 0",
+// 		})
+// }
 
 func TestCreateQueue(t *testing.T) {
 	_ = NewBackingQueue[int](&FileSaveConfig[int]{
