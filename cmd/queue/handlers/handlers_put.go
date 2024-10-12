@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -13,12 +12,11 @@ import (
 
 // Broken out for testing.
 func putEnqueueHandler(domain string) {
-	log.Println("Queueing", domain)
-
+	//log.Println("Queueing", domain)
 	// It is polite to ask for a new queue.
 	// The library will protect us if we don't.
-	TheQueue.NewQueue(domain)
-	TheQueue.Enqueue(domain, Job{
+	TheMultiqueue.NewQueue(TheQueue)
+	TheMultiqueue.Enqueue(TheQueue, Job{
 		JobId:  uuid.NewString(),
 		Domain: domain,
 		Pages:  []string{},
@@ -32,5 +30,4 @@ func PutEnqueueHandler(w http.ResponseWriter, r *http.Request) {
 	putEnqueueHandler(domain)
 	duration := time.Since(start)
 	render.DefaultResponder(w, r, render.M{"result": "ok", "elapsed": duration})
-
 }

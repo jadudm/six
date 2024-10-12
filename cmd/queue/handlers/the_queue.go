@@ -5,12 +5,14 @@ import (
 	. "com.jadud.search.six/pkg/types"
 )
 
-var TheQueue *BQ[Job]
+var TheMultiqueue *BQ[Job]
+
+const TheQueue string = "jobs"
 
 func Init(filepath string, cron string) {
-	TheQueue = NewBackingQueue[Job](&FileSaveConfig[Job]{
+	TheMultiqueue = NewBackingQueue[Job](&FileSaveConfig[Job]{
 		FilePath: filepath,
 		Cron:     cron,
 	})
-
+	TheMultiqueue.NewQueue(TheQueue)
 }

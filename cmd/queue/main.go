@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	H "com.jadud.search.six/cmd/queue/handlers"
+	handle "com.jadud.search.six/cmd/queue/handlers"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -25,7 +25,7 @@ func load_dotenv() {
 func main() {
 	load_dotenv()
 	r := chi.NewRouter()
-	H.Init("/tmp", "*/10 0 0 0 0")
+	handle.Init("/tmp/queue-backup", "*/1 0 0 0 0")
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
@@ -35,11 +35,11 @@ func main() {
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("search six"))
+		w.Write([]byte("queue six"))
 	})
 
-	r.Put("/enqueue/{domain}", H.PutEnqueueHandler)
-	r.Get("/dequeue", H.GetDequeueHandler)
+	r.Put("/enqueue/{domain}", handle.PutEnqueueHandler)
+	r.Get("/dequeue", handle.GetDequeueHandler)
 
 	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))
