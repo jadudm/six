@@ -4,13 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	GTST "com.jadud.search.six/pkg/types"
+	gtst "com.jadud.search.six/pkg/types"
 	"github.com/go-resty/resty/v2"
 )
-
-func checkQueue() {
-
-}
 
 // func check_queue() string {
 // 	client := resty.New()
@@ -40,7 +36,7 @@ func checkQueue() {
 // 	return "check_queue() NEVER GETS HERE"
 // }
 
-func CheckQueue(queue string, crontab string, ch_msg chan<- GTST.JSON) {
+func CheckQueue(queue string, crontab string, ch_msg chan<- gtst.JSON) {
 	client := resty.New()
 
 	// c := cron.New()
@@ -62,10 +58,10 @@ func CheckQueue(queue string, crontab string, ch_msg chan<- GTST.JSON) {
 			EnableTrace().
 			//FIXME variable/vcap
 			Get(fmt.Sprintf("http://localhost:6000/dequeue/%s", queue))
-		if err != nil {
-			panic("DEQUEUE FAILED")
+		if err == nil {
+			body := resp.Body()
+			ch_msg <- body
 		}
-		ch_msg <- resp.Body()
-		time.Sleep(5 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }

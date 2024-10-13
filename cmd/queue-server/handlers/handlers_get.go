@@ -5,18 +5,19 @@ import (
 	"net/http"
 	"time"
 
-	GTST "com.jadud.search.six/pkg/types"
+	gtst "com.jadud.search.six/pkg/types"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/tidwall/gjson"
 )
 
 // Broken out for testing.
-func getDequeueHandler(queue string) (jm, error) {
+func getDequeueHandler(queue string) (gtst.JSON, error) {
 	if Q.Length(queue) > 0 {
-		msg := GTST.ToMap(Q.Dequeue(queue))
+		msg := Q.Dequeue(queue)
 		return msg, nil
 	} else {
-		msg := GTST.ToMap([]byte("{}"))
+		msg := gtst.EmptyObject
 		return msg, errors.New("EMPTY")
 	}
 }
@@ -29,17 +30,18 @@ func GetDequeueHandler(w http.ResponseWriter, r *http.Request) {
 
 	duration := time.Since(start)
 	if err == nil {
+		gr := gjson.ParseBytes(msg)
 		sendMap := make(render.M, 0)
 		sendMap["result"] = "ok"
-		sendMap["elapsed"] = "duration"
-		for k, v := range msg {
-			sendMap[k] = v
+		sendMap["elapsed"] = duration
+		for _, key := range []string{"host", "path", "type"} {
+			sendMap[key] = gr.Get(key).String()
 		}
 		render.DefaultResponder(w, r, sendMap)
 	} else {
 		render.DefaultResponder(w, r, render.M{
 			"result":  "error",
-			"domain":  "empty queue",
+			"host":    nil,
 			"elapsed": duration,
 		})
 

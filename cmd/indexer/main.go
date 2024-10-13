@@ -4,8 +4,8 @@ import (
 	"log"
 	"sync"
 
-	tlp "com.jadud.search.six/cmd/update-orchestrator/tlp"
-	GSTS "com.jadud.search.six/pkg/types"
+	tlp "com.jadud.search.six/pkg/tlp"
+	gsts "com.jadud.search.six/pkg/types"
 	"github.com/joho/godotenv"
 )
 
@@ -27,17 +27,16 @@ func load_dotenv() {
 func main() {
 	load_dotenv()
 
-	ch_q_out := make(chan GSTS.JSON)
-	//ch_sm_bh := make(chan GSTS.JSON)
-	ch_bh := make(chan GSTS.JSON)
+	ch_a := make(chan gsts.JSON)
+	ch_b := make(chan gsts.JSON)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go tlp.CheckQueue("HEAD", "@every 1m", ch_q_out)
-	//go tlp.ShowMsg(ch_q_out, ch_sm_bh)
-	go tlp.HeadCheck(ch_q_out, ch_bh)
-	go tlp.NoisyBlackHole[GSTS.JSON](ch_bh)
+	go tlp.CheckQueue("INDEX", "@every 1m", ch_a)
+	// HeadCheck eats anything that doesn't return a 200
+	go tlp.HeadCheck(ch_a, ch_b)
+	go tlp.Index(ch_b)
 
 	wg.Wait()
 	log.Println("we will never see this")
