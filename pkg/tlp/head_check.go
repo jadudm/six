@@ -1,7 +1,6 @@
 package tlp
 
 import (
-	"log"
 	"net/url"
 
 	gtst "com.jadud.search.six/pkg/types"
@@ -14,7 +13,7 @@ func HeadCheck(ch_in <-chan gtst.JSON, ch_out chan<- gtst.JSON) {
 
 	for {
 		msg := <-ch_in
-		log.Println(string(msg))
+
 		var u url.URL
 		u.Scheme = "https"
 		u.Host = gjson.GetBytes(msg, "host").String()

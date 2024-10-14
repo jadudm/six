@@ -1,11 +1,14 @@
-build:
-	go build --tags fts5 -o ../../bin/update-orchestrator.exe
+build: container_build
+	mv indexer.exe ../../bin/indexer.exe
+
+container_build:
+	go build -o indexer.exe
 
 test:
 	go test
 
 run:
-	go run --tags fts5 main.go
+	go run *.go
 
 check:
 	staticcheck

@@ -74,7 +74,7 @@ func Index(ch_msg <-chan JSON) {
 			}))
 			log.Println(m)
 			content := fetch_html_content(get(msg, "url"))
-			store_to_s3(m["host"].(string), content)
+			store_to_s3(get(msg, "host"), content)
 
 		} else if strings.Contains(content_type, "pdf") {
 			log.Println("found pdf")

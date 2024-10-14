@@ -1,0 +1,15 @@
+FROM golang:bookworm
+
+RUN apt-get update \
+    && apt-get install -y build-essential
+
+# Copy in the binaries
+WORKDIR /app
+COPY . .
+WORKDIR /app/cmd/queue-server
+RUN make container_build
+RUN chmod 755 /app/cmd/queue-server/run.sh
+
+CMD ["/app/cmd/queue-server/run.sh"]
+
+

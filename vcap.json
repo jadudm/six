@@ -1,0 +1,103 @@
+{
+    "user-provided": [
+        {
+            "label": "queue-server",
+            "name": "queue-server",
+            "tags": [],
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "queue-server",
+            "binding_guid": "UUIDBRAVO2",
+            "binding_name": null,
+            "credentials": {
+                "port": 8080,
+                "host": "queue-server",
+                "scheme": "http",
+                "endpoint": "http://queue-server:8080"
+            }
+        },
+        {
+            "label": "indexer",
+            "name": "indexer",
+            "tags": [],
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "indexer",
+            "binding_guid": "UUIDBRAVO2",
+            "binding_name": null,
+            "credentials": {
+                "port": 9090,
+                "host": "indexer",
+                "scheme": "http",
+                "endpoint": "http://indexer:9090"
+            }
+        },
+        {
+            "label": "mc",
+            "name": "indexed-content",
+            "tags": [],
+            "instance_guid": "UUIDALPHA1",
+            "instance_name": "backups",
+            "binding_guid": "UUIDALPHA2",
+            "binding_name": null,
+            "credentials": {
+                "access_key_id": "nutnutnut",
+                "secret_access_key": "nutnutnut",
+                "bucket": "backups",
+                "endpoint": "http://minio:9001",
+                "admin_username": "minioadmin",
+                "admin_password": "minioadmin"
+            }
+        }
+    ],
+    "aws-rds": [
+        {
+            "label": "fac-db",
+            "provider": null,
+            "plan": null,
+            "name": "fac-db",
+            "tags": [
+                "database",
+                "docker"
+            ],
+            "instance_guid": "UUIDINDIA1",
+            "instance_name": "db",
+            "binding_guid": "UUIDINDIA2",
+            "binding_name": null,
+            "credentials": {
+                "db_name": "postgres",
+                "host": "127.0.0.1",
+                "name": "postgres",
+                "password": "",
+                "port": "5432",
+                "uri": "postgres://postgres@127.0.0.10:5432/postgres?sslmode=disable",
+                "username": "postgres"
+            },
+            "syslog_drain_url": null,
+            "volume_mounts": []
+        },
+        {
+            "label": "fac-snapshot-db",
+            "provider": null,
+            "plan": null,
+            "name": "fac-snapshot-db",
+            "tags": [
+                "database",
+                "docker"
+            ],
+            "instance_guid": "UUIDJULIET1",
+            "instance_name": "db",
+            "binding_guid": "UUIDJULIET2",
+            "binding_name": null,
+            "credentials": {
+                "db_name": "postgres",
+                "host": "127.0.0.1",
+                "name": "postgres",
+                "password": "",
+                "port": "5431",
+                "uri": "postgres://postgres@127.0.0.10:5431/postgres?sslmode=disable",
+                "username": "postgres"
+            },
+            "syslog_drain_url": null,
+            "volume_mounts": []
+        }
+    ]
+}

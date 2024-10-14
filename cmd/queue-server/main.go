@@ -6,24 +6,21 @@ import (
 	"os"
 
 	handle "com.jadud.search.six/cmd/queue-server/handlers"
+	vcap "com.jadud.search.six/pkg/vcap"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func load_dotenv() {
-	// https://github.com/joho/godotenv
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
-
 func main() {
-	load_dotenv()
+	if len(os.Getenv("VCAP_SERVICES")) < 30 {
+		log.Println("export VCAP_SERVICES=$(cat /app/vcap.json)")
+		log.Fatal("Set VCAP_SERVICES to run the queue-server. Exiting.")
+	}
+	vcap_services := vcap.ReadVCAPConfig()
+
 	r := chi.NewRouter()
 	//FIXME load the path from a config/env var
 	handle.Init("/tmp/queue-backup", "@every 1m")
@@ -46,6 +43,7 @@ func main() {
 		w.Write([]byte("pong"))
 	})
 
-	// FIXME: Either env var or config/vcap
-	http.ListenAndServe(":"+os.Getenv("PORT"), r)
+	port := vcap_services.VCAP.Get(`user-provided.#(name=="queue-server").credentials.port`).String()
+	log.Printf("starting queue-server on port %s\n", port)
+	http.ListenAndServe(":"+port, r)
 }

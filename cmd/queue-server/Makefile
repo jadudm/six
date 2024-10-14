@@ -1,5 +1,8 @@
-build:
-	go build -o ../../bin/queue-server.exe
+build: container_build
+	cp queue-server.exe ../../bin/queue-server.exe
+
+container_build:
+	go build -o queue-server.exe
 
 test:
 	go test handlers/*.go -v
@@ -9,9 +12,3 @@ run:
 
 check:
 	staticcheck
-
-# Migrations
-# up:
-# 	dbmate -u "sqlite:db/queue.sqlite" up
-# down:
-# 	dbmate -u "sqlite:db/queue.sqlite" down

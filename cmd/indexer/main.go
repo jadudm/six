@@ -2,30 +2,39 @@ package main
 
 import (
 	"log"
+	"net/http"
+	"os"
 	"sync"
 
 	tlp "com.jadud.search.six/pkg/tlp"
 	gsts "com.jadud.search.six/pkg/types"
-	"github.com/joho/godotenv"
+	vcap "com.jadud.search.six/pkg/vcap"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
-func load_dotenv() {
-	// https://github.com/joho/godotenv
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+func run_healthcheck(vcap_services *vcap.VcapServices) {
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(render.SetContentType(render.ContentTypeJSON))
+	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("pong"))
+	})
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	port := vcap_services.VCAP.Get(`user-provided.#(name=="indexer").credentials.port`).String()
+	log.Printf("starting indexer on port %s\n", port)
+	http.ListenAndServe(":"+port, r)
+
+	wg.Wait()
 }
 
-// I'm the update-orchestrator.
-// That means I do the following:
-// 1. Check the HEAD queue for incoming jobs (these could be domains or pages... does not matter)
-// 2. Depending on whether it is HTML/PDF/etc., put it on the right indexer queue.
-// 3. Indexers pull work from their queues. They both walk for links (back to HEAD), or
-//    they pull content and send it to the DB.
-
-func main() {
-	load_dotenv()
+func run_indexer(vcap_services *vcap.VcapServices) {
 
 	ch_a := make(chan gsts.JSON)
 	ch_b := make(chan gsts.JSON)
@@ -33,11 +42,32 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go tlp.CheckQueue("INDEX", "@every 1m", ch_a)
+	go tlp.CheckQueue(vcap_services, "INDEX", "@every 1m", ch_a)
 	// HeadCheck eats anything that doesn't return a 200
 	go tlp.HeadCheck(ch_a, ch_b)
 	go tlp.Index(ch_b)
 
 	wg.Wait()
+
+}
+
+func main() {
+
+	if len(os.Getenv("VCAP_SERVICES")) < 30 {
+		log.Println("export VCAP_SERVICES=$(cat /app/vcap.json)")
+		log.Fatal("Set VCAP_SERVICES to run the indexer. Exiting.")
+	}
+	vcap_services := vcap.ReadVCAPConfig()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	log.Println("running healthcheck")
+	go run_healthcheck(vcap_services)
+
+	log.Println("running indexer")
+	go run_indexer(vcap_services)
+	wg.Wait()
+
 	log.Println("we will never see this")
 }

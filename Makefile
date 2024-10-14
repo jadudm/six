@@ -4,5 +4,6 @@ clean:
 	rm -f bin/queue.exe
 
 build: clean
-	cd cmd/queue && $(MAKE) build
-
+	cd cmd/indexer ; make build
+	cd cmd/queue-server ; make build
+	# docker build -f -t com.jadud/six:latest .

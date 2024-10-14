@@ -71,6 +71,7 @@ sequenceDiagram
     activate I
     I->>TQ: <reset_timer site.gov pack_inc_callback>
     I->WWW: Fetch site.gov
+    Note right of I: Clean content
     I->>S3: Store content to /pack/site.gov/<uuid>.json
     deactivate I
 ```
@@ -188,9 +189,10 @@ sequenceDiagram
     deactivate PQ
     activate P
     S3<<->>P: Fetch SQLite DB
-    S3<<->>P: Fetch and store content
+    S3<<->>P: Fetch and store content objects
     Note right of P: VACUUM, compress SQLite DB
     P->>S3: Write DB to S3
+    P->>S3: Remove objects from S3
     P->>OQ: <update site.gov>
     deactivate P
 ```
@@ -213,9 +215,10 @@ sequenceDiagram
     deactivate PQ
     activate P
     Note right of P: Create SQLite DB
-    S3<<->>P: Fetch and store content
+    S3<<->>P: Fetch and store content objects
     Note right of P: VACUUM, compress SQLite DB
     P->>S3: Write DB to S3
+    P->>S3: Remove objects from S3
     P->>OQ: <update site.gov>
     deactivate P
 ```
