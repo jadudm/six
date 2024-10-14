@@ -8,7 +8,7 @@ import (
 
 	"com.jadud.search.six/pkg/dyndb/mdb"
 	obj "com.jadud.search.six/pkg/object-storage"
-	. "com.jadud.search.six/pkg/types"
+	gtst "com.jadud.search.six/pkg/types"
 	"com.jadud.search.six/pkg/vcap"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -55,7 +55,7 @@ func pack_full(buckets *obj.Buckets, m map[string]interface{}) {
 	objects := ephemeral_b.ListObjects("indexed/" + host)
 	for _, o := range objects {
 		json_b := ephemeral_b.GetObject(*o.Key)
-		jsm := BytesToMap(json_b)
+		jsm := gtst.BytesToMap(json_b)
 		log.Println(jsm)
 
 		// host, path, title, text)
@@ -83,12 +83,12 @@ func copy_db(buckets *obj.Buckets, m map[string]interface{}) {
 	databases_b.UploadFile(key_path, sqlite_filename)
 }
 
-func Pack(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan JSON) {
+func Pack(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan gtst.JSON) {
 	//qs := queueing.NewQueueServer("queue-server", vcap_services)
 
 	for {
 		msg := <-ch_msg
-		m := BytesToMap(msg)
+		m := gtst.BytesToMap(msg)
 
 		// We will get a domain.
 		// Walk that domain key in the S3 bucket, and stuff everything into an SQLite DB.

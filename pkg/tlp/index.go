@@ -10,7 +10,7 @@ import (
 	queueing "com.jadud.search.six/cmd/queue-server/pkg/queueing"
 	con "com.jadud.search.six/pkg/content"
 	obj "com.jadud.search.six/pkg/object-storage"
-	. "com.jadud.search.six/pkg/types"
+	gtst "com.jadud.search.six/pkg/types"
 	"com.jadud.search.six/pkg/vcap"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-resty/resty/v2"
@@ -69,26 +69,26 @@ func store_to_s3(b *obj.Bucket, m map[string]interface{}) {
 	// Base the filename on the current timestamp.
 	// Not UUID : uuid.NewString() + ".json"
 	path := []string{"indexed", m["host"].(string), m["indexed-on"].(string) + "-" + uuid.NewString() + ".json"}
-	b.PutObject(path, MapToBytes(m))
+	b.PutObject(path, gtst.MapToBytes(m))
 }
 
 // mv to types
 // also split from pkg to internal -- only things to share ext. should be in pkg
-func get(msg JSON, key string) string {
+func get(msg gtst.JSON, key string) string {
 	return gjson.GetBytes(msg, key).String()
 }
 
-func Index(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan JSON) {
+func Index(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan gtst.JSON) {
 	qs := queueing.NewQueueServer("queue-server", vcap_services)
 	for {
 		msg := <-ch_msg
-		m := BytesToMap(msg)
+		m := gtst.BytesToMap(msg)
 		content_type := get(msg, "content-type")
 		if strings.Contains(content_type, "html") {
 			cb := make(map[string]string, 0)
 			cb["domain"] = get(msg, "domain")
 			cb["type"] = "pack_full"
-			qs.Enqueue("TIMER", MapToBytes(m))
+			qs.Enqueue("TIMER", gtst.MapToBytes(m))
 
 			content := fetch_html_content(get(msg, "url"))
 

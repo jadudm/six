@@ -11,7 +11,7 @@ import (
 
 	queueing "com.jadud.search.six/cmd/queue-server/pkg/queueing"
 	obj "com.jadud.search.six/pkg/object-storage"
-	. "com.jadud.search.six/pkg/types"
+	gtst "com.jadud.search.six/pkg/types"
 	"com.jadud.search.six/pkg/vcap"
 	"github.com/PuerkitoBio/goquery"
 	cache "github.com/go-pkgz/expirable-cache/v3"
@@ -21,8 +21,10 @@ import (
 func trimSuffix(s, suffix string) string {
 	if strings.HasSuffix(s, suffix) {
 		s = s[:len(s)-len(suffix)]
+		return s
+	} else {
+		return s
 	}
-	return s
 }
 
 func is_crawlable(host *url.URL, link string) (string, error) {
@@ -137,7 +139,7 @@ func get_ttl(vcap_services *vcap.VcapServices) int64 {
 	return (minutes * 60) + seconds
 }
 
-func Crawl(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan JSON) {
+func Crawl(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan gtst.JSON) {
 	qs := queueing.NewQueueServer("queue-server", vcap_services)
 
 	ttl := get_ttl(vcap_services)
@@ -146,7 +148,7 @@ func Crawl(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan
 
 	for {
 		msg := <-ch_msg
-		m := BytesToMap(msg)
+		m := gtst.BytesToMap(msg)
 		content_type := get(msg, "content-type")
 		if strings.Contains(content_type, "html") {
 			// log.Println("crawler found html")
@@ -169,8 +171,8 @@ func Crawl(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan
 						m["host"] = u.Host
 						m["path"] = u.Path
 						// The crawler both crawls and queues pages for indexing.
-						qs.Enqueue("CRAWL", MapToBytes(m))
-						qs.Enqueue("INDEX", MapToBytes(m))
+						qs.Enqueue("CRAWL", gtst.MapToBytes(m))
+						qs.Enqueue("INDEX", gtst.MapToBytes(m))
 					} else {
 						log.Printf("CRAWLER cache hit[%s]\n", link)
 					}
