@@ -48,6 +48,18 @@ func TestInsertIntoQueue(t *testing.T) {
 	assert.Equal(t, bq.IsEmpty("alice"), false)
 }
 
+func TestRemoval(t *testing.T) {
+	bq := NewBackingQueue[string](&FileSaveConfig[string]{
+		FilePath: "test_data",
+		Cron:     "*/1 0 0 0 0",
+	})
+	bq.NewQueue("alice")
+	bq.Enqueue("alice", "1")
+	assert.Equal(t, bq.IsEmpty("alice"), false)
+	bq.Dequeue("alice")
+	assert.Equal(t, bq.IsEmpty("alice"), true)
+}
+
 func TestInsertIntoTwoQueues(t *testing.T) {
 	bq := NewBackingQueue[string](&FileSaveConfig[string]{
 		FilePath: "test_data",

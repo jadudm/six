@@ -10,7 +10,7 @@
             "binding_name": null,
             "credentials": {
                 "port": 8080,
-                "host": "queue-server",
+                "host": "localhost",
                 "scheme": "http",
                 "endpoint": "http://localhost:8080"
             }
@@ -24,10 +24,27 @@
             "binding_guid": "UUIDBRAVO2",
             "binding_name": null,
             "credentials": {
-                "port": 9090,
-                "host": "indexer",
+                "port": 8181,
+                "host": "localhost",
                 "scheme": "http",
-                "endpoint": "http://localhost:9090"
+                "endpoint": "http://localhost:8181"
+            }
+        },
+        {
+            "label": "crawler",
+            "name": "crawler",
+            "tags": [],
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "crawler",
+            "binding_guid": "UUIDBRAVO2",
+            "binding_name": null,
+            "credentials": {
+                "port": 8282,
+                "host": "localhost",
+                "scheme": "http",
+                "endpoint": "http://localhost:8282",
+                "cache-ttl-minutes": 10,
+                "cache-ttl-seconds": 0
             }
         }
     ],

@@ -49,10 +49,8 @@ services:
       context: .
       dockerfile: Dockerfile.indexer
     container_name: indexer
-    # volumes:
-    #   - ./volumes/indexer:/bin/indexer
     ports:
-      - 9090:9090
+      - 8181:8181
     # https://docs.docker.com/compose/how-tos/startup-order/
     depends_on:
       minio:
@@ -60,14 +58,40 @@ services:
       queue-server:
         condition: service_healthy
     healthcheck:
-      test: curl --fail http://localhost:9090/ping || exit 1
+      test: curl --fail http://localhost:8181/ping || exit 1
       interval: 10s
       timeout: 30s
       retries: 3
       start_period: 60s
     environment:
       ENV: "DOCKER"
-      
+
+  #-----------------------------------------------------
+  # crawler
+  #-----------------------------------------------------
+  crawler:
+    build: 
+      context: .
+      dockerfile: Dockerfile.crawler
+    container_name: crawler
+    ports:
+      - 8282:8282
+    # https://docs.docker.com/compose/how-tos/startup-order/
+    depends_on:
+      minio:
+        condition: service_healthy
+      queue-server:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail http://localhost:8282/ping || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    environment:
+      ENV: "DOCKER"
+
+
   #-----------------------------------------------------
   # minio
   #-----------------------------------------------------

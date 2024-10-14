@@ -11,7 +11,7 @@ import (
 	vcap "com.jadud.search.six/pkg/vcap"
 )
 
-func run_indexer(vcap_services *vcap.VcapServices) {
+func run_crawler(vcap_services *vcap.VcapServices) {
 
 	ch_a := make(chan gsts.JSON)
 	ch_b := make(chan gsts.JSON)
@@ -21,10 +21,10 @@ func run_indexer(vcap_services *vcap.VcapServices) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go tlp.CheckQueue(vcap_services, "INDEX", "@every 1m", ch_a)
+	go tlp.CheckQueue(vcap_services, "CRAWL", "@every 1m", ch_a)
 	// HeadCheck eats anything that doesn't return a 200
 	go tlp.HeadCheck(ch_a, ch_b)
-	go tlp.Index(vcap_services, buckets, ch_b)
+	go tlp.Crawl(vcap_services, buckets, ch_b)
 
 	wg.Wait()
 
@@ -42,10 +42,10 @@ func main() {
 	wg.Add(1)
 
 	log.Println("running healthcheck")
-	go tlp.HealthCheck("indexer", vcap_services)
+	go tlp.HealthCheck("crawler", vcap_services)
 
-	log.Println("running indexer")
-	go run_indexer(vcap_services)
+	log.Println("running crawler")
+	go run_crawler(vcap_services)
 	wg.Wait()
 
 	log.Println("we will never see this")

@@ -154,7 +154,7 @@ func (b *Bucket) ListObjects() {
 
 func (b *Bucket) PutObject(path []string, object []byte) {
 	key := strings.Join(path, "/")
-	log.Println("storing object at %s", key)
+	log.Printf("storing object at %s", key)
 	_, err := b.client.PutObject(&s3.PutObjectInput{
 		Body:   bytes.NewReader(object),
 		Bucket: &b.Name,

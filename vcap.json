@@ -24,27 +24,27 @@
             "binding_guid": "UUIDBRAVO2",
             "binding_name": null,
             "credentials": {
-                "port": 9090,
+                "port": 8181,
                 "host": "indexer",
                 "scheme": "http",
-                "endpoint": "http://indexer:9090"
+                "endpoint": "http://indexer:8181"
             }
         },
         {
-            "label": "mc",
-            "name": "ephemeral-content",
+            "label": "crawler",
+            "name": "crawler",
             "tags": [],
-            "instance_guid": "UUIDALPHA1",
-            "instance_name": "backups",
-            "binding_guid": "UUIDALPHA2",
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "crawler",
+            "binding_guid": "UUIDBRAVO2",
             "binding_name": null,
             "credentials": {
-                "access_key_id": "nutnutnut",
-                "secret_access_key": "nutnutnut",
-                "bucket": "backups",
-                "endpoint": "http://minio:9001",
-                "admin_username": "minioadmin",
-                "admin_password": "minioadmin"
+                "port": 8282,
+                "host": "crawler",
+                "scheme": "http",
+                "endpoint": "http://crawler:8282",
+                "cache-ttl-minutes": 2,
+                "cache-ttl-seconds": 0
             }
         }
     ],
