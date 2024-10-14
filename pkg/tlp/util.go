@@ -23,6 +23,6 @@ func BlackHole[T any](ch_in <-chan T) {
 func NoisyBlackHole[T any](ch_in <-chan T) {
 	for {
 		msg := <-ch_in
-		log.Printf("%s", msg)
+		log.Println(msg)
 	}
 }
