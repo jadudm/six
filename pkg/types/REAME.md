@@ -225,7 +225,7 @@ sequenceDiagram
 
 ## orchestrator
 
-The search orchestrator is a router for search messages. It keeps track of which databases are on which searchers. In other words, it is a stateful component that knows where things are.
+The search orchestrator keeps track of which databases are on which searchers. In other words, it is a stateful component that knows where things are.
 
 In the case of a cold bring-up, everything gets rebuilt. The orchestrator is responsible for (at startup) discovering what databases are in S3, handling searcher registrations, and distributing DBs to those searchers. Just like a "living" database (Postgres, Elasticsearch, etc.) we assume the databases survive restart; we assume the application does not. Therefore, the state that the orchestrator maintains does not get persisted.
 
@@ -248,6 +248,14 @@ sequenceDiagram
     deactivate Q
     Note right of O: Add searcher to local table
 ```
+
+### `get_routes`
+
+The router will periodically want to know the current routes. (Really, this is an example where there should be a callback---we should tell the router when things change.) Or, perhaps we drop a message, and the router asks us for the current routes. Either way...
+
+## router
+
+The router takes search queries and routes them to the correct searcher. By pull or push, it needs to get the current routes from the orchestrator when things change.
 
 ## searcher
 

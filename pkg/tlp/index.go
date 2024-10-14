@@ -7,9 +7,12 @@ import (
 
 	qing "com.jadud.search.six/cmd/queue-server/pkg/queueing"
 	con "com.jadud.search.six/pkg/content"
+	obj "com.jadud.search.six/pkg/object-storage"
+
 	. "com.jadud.search.six/pkg/types"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-resty/resty/v2"
+	"github.com/google/uuid"
 	"github.com/tidwall/gjson"
 )
 
@@ -45,16 +48,18 @@ func fetch_html_content(url string) string {
 
 }
 
-func store_to_s3(host string, content string) {
-	log.Println("Storing to S3", host)
-	log.Println(content)
+func store_to_s3(b *obj.Bucket, m map[string]interface{}) {
+	log.Println("Storing to S3", m["host"])
+	log.Println(m["content"])
+	path := []string{"indexed", m["host"].(string), uuid.NewString() + ".json"}
+	b.PutObject(path, MapToBytes(m))
 }
 
 func get(msg JSON, key string) string {
 	return gjson.GetBytes(msg, key).String()
 }
 
-func Index(ch_msg <-chan JSON) {
+func Index(buckets *obj.Buckets, ch_msg <-chan JSON) {
 	// A good message has come in. Send it to the right home.
 	qs := qing.QueueServer{
 		Scheme: "http",
@@ -74,7 +79,8 @@ func Index(ch_msg <-chan JSON) {
 			}))
 			log.Println(m)
 			content := fetch_html_content(get(msg, "url"))
-			store_to_s3(get(msg, "host"), content)
+			m["content"] = content
+			store_to_s3(&buckets.Ephemeral, m)
 
 		} else if strings.Contains(content_type, "pdf") {
 			log.Println("found pdf")

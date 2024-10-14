@@ -2,7 +2,7 @@ build: container_build
 	mv indexer.exe ../../bin/indexer.exe
 
 container_build:
-	go build -o indexer.exe
+	go build -buildvcs=false -o indexer.exe
 
 test:
 	go test

@@ -1,7 +1,6 @@
-FROM golang:bookworm
-
-RUN apt-get update \
-    && apt-get install -y build-essential
+#FROM golang:bookworm
+#FROM cloudfoundry/cflinuxfs4
+FROM jadud/builder
 
 # Copy in the binaries
 WORKDIR /app

@@ -25,7 +25,7 @@ services:
   queue-server:
     build: 
       context: .
-      dockerfile: Dockerfile_queue-server
+      dockerfile: Dockerfile.queue-server
     container_name: queue-server
     volumes:
       - ./volumes/queue-server:/bin/queue-server
@@ -47,7 +47,7 @@ services:
   indexer:
     build: 
       context: .
-      dockerfile: Dockerfile_indexer
+      dockerfile: Dockerfile.indexer
     container_name: indexer
     # volumes:
     #   - ./volumes/indexer:/bin/indexer

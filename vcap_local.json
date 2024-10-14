@@ -12,7 +12,7 @@
                 "port": 8080,
                 "host": "queue-server",
                 "scheme": "http",
-                "endpoint": "http://queue-server:8080"
+                "endpoint": "http://localhost:8080"
             }
         },
         {
@@ -27,24 +27,7 @@
                 "port": 9090,
                 "host": "indexer",
                 "scheme": "http",
-                "endpoint": "http://indexer:9090"
-            }
-        },
-        {
-            "label": "mc",
-            "name": "ephemeral-content",
-            "tags": [],
-            "instance_guid": "UUIDALPHA1",
-            "instance_name": "backups",
-            "binding_guid": "UUIDALPHA2",
-            "binding_name": null,
-            "credentials": {
-                "access_key_id": "nutnutnut",
-                "secret_access_key": "nutnutnut",
-                "bucket": "backups",
-                "endpoint": "http://minio:9001",
-                "admin_username": "minioadmin",
-                "admin_password": "minioadmin"
+                "endpoint": "http://localhost:9090"
             }
         }
     ],
@@ -64,7 +47,7 @@
             "binding_guid": "UUIDALPHA2",
             "binding_name": null,
             "credentials": {
-                "uri": "http://minio:9000",
+                "uri": "http://localhost:9000",
                 "port": 9000,
                 "insecure_skip_verify": false,
                 "access_key_id": "nutnutnut",
@@ -93,7 +76,7 @@
             "binding_guid": "UUIDALPHA2",
             "binding_name": null,
             "credentials": {
-                "uri": "http://minio:9000",
+                "uri": "http://localhost:9000",
                 "port": 9000,
                 "insecure_skip_verify": false,
                 "access_key_id": "nutnutnut",

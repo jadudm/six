@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 
+	obj "com.jadud.search.six/pkg/object-storage"
 	tlp "com.jadud.search.six/pkg/tlp"
 	gsts "com.jadud.search.six/pkg/types"
 	vcap "com.jadud.search.six/pkg/vcap"
@@ -39,13 +40,15 @@ func run_indexer(vcap_services *vcap.VcapServices) {
 	ch_a := make(chan gsts.JSON)
 	ch_b := make(chan gsts.JSON)
 
+	buckets := obj.InitBuckets(vcap_services)
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	go tlp.CheckQueue(vcap_services, "INDEX", "@every 1m", ch_a)
 	// HeadCheck eats anything that doesn't return a 200
 	go tlp.HeadCheck(ch_a, ch_b)
-	go tlp.Index(ch_b)
+	go tlp.Index(buckets, ch_b)
 
 	wg.Wait()
 
