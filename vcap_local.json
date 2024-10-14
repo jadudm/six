@@ -46,6 +46,23 @@
                 "cache-ttl-minutes": 10,
                 "cache-ttl-seconds": 0
             }
+        },
+        {
+            "label": "packer",
+            "name": "packer",
+            "tags": [],
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "packer",
+            "binding_guid": "UUIDBRAVO2",
+            "binding_name": null,
+            "credentials": {
+                "port": 8383,
+                "host": "localhost",
+                "scheme": "http",
+                "endpoint": "http://localhost:8383",
+                "cache-ttl-minutes": 10,
+                "cache-ttl-seconds": 0
+            }
         }
     ],
     "s3": [

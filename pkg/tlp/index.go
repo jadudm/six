@@ -18,10 +18,24 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+func index_sel(sel *goquery.Selection) string {
+	content := ""
+	txt := sel.Text()
+	if len(txt) > 0 {
+		repl := strings.ToLower(txt)
+		repl = con.RemoveStopwords(repl)
+		repl += " "
+		if len(repl) > 2 {
+			content += repl
+		}
+	}
+	return content
+}
+
 // move to content pkg
 func fetch_html_content(url string) string {
 	client := resty.New()
-	log.Println("Fetching", url)
+	log.Println("INDEXER Fetching", url)
 	resp, err := client.R().Get(url)
 	if err != nil {
 		log.Println(err)
@@ -36,15 +50,13 @@ func fetch_html_content(url string) string {
 	}
 
 	doc.Find("p").Each(func(ndx int, sel *goquery.Selection) {
-		txt := sel.Text()
-		if len(txt) > 0 {
-			repl := strings.ToLower(txt)
-			repl = con.RemoveStopwords(repl)
-			repl += " "
-			if len(repl) > 2 {
-				content += repl
-			}
-		}
+		content += index_sel(sel)
+	})
+	doc.Find("li").Each(func(ndx int, sel *goquery.Selection) {
+		content += index_sel(sel)
+	})
+	doc.Find("td").Each(func(ndx int, sel *goquery.Selection) {
+		content += index_sel(sel)
 	})
 
 	return content
@@ -52,7 +64,7 @@ func fetch_html_content(url string) string {
 
 // mv to object storage
 func store_to_s3(b *obj.Bucket, m map[string]interface{}) {
-	log.Println("Storing to S3", m["host"])
+	log.Println("INDEXER Storing to S3", m["host"])
 	log.Println(m["content"])
 	// Base the filename on the current timestamp.
 	// Not UUID : uuid.NewString() + ".json"
@@ -73,11 +85,10 @@ func Index(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan
 		m := BytesToMap(msg)
 		content_type := get(msg, "content-type")
 		if strings.Contains(content_type, "html") {
-			log.Println("found html")
-			qs.Enqueue("TIMER", StructToJson(ResetTimer{
-				Domain:   get(msg, "domain"),
-				Callback: []byte(""),
-			}))
+			cb := make(map[string]string, 0)
+			cb["domain"] = get(msg, "domain")
+			cb["type"] = "pack_full"
+			qs.Enqueue("TIMER", MapToBytes(m))
 
 			content := fetch_html_content(get(msg, "url"))
 

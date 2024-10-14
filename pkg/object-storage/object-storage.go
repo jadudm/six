@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"com.jadud.search.six/pkg/vcap"
@@ -13,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	session "github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type Bucket struct {
@@ -22,7 +24,7 @@ type Bucket struct {
 	SecretAccessKey string
 	Endpoint        string
 	client          *s3.S3
-	//session           *session.Session
+	session         *session.Session
 }
 
 type Buckets struct {
@@ -60,7 +62,7 @@ func InitBuckets(vc *vcap.VcapServices) *Buckets {
 	return &Buckets
 }
 
-func s3_client(b *Bucket) *s3.S3 {
+func s3_client(b *Bucket) (*s3.S3, *session.Session) {
 	// https://stackoverflow.com/questions/41544554/how-to-run-aws-sdk-with-credentials-from-variables
 	creds := credentials.NewStaticCredentials(b.AccessKeyId, b.SecretAccessKey, "")
 
@@ -73,10 +75,10 @@ func s3_client(b *Bucket) *s3.S3 {
 		log.Fatal("CANNOT INIT AWS SESSION")
 	}
 	svc := s3.New(sess)
-	return svc
+	return svc, sess
 }
 
-func minio_client(b *Bucket) *s3.S3 {
+func minio_client(b *Bucket) (*s3.S3, *session.Session) {
 	// Configure to use MinIO Server
 	s3Config := &aws.Config{
 		Credentials:      credentials.NewStaticCredentials(b.AccessKeyId, b.SecretAccessKey, ""),
@@ -89,8 +91,10 @@ func minio_client(b *Bucket) *s3.S3 {
 	if err != nil {
 		log.Fatal("CANNOT INIT AWS SESSION")
 	}
+
 	s3Client := s3.New(sess)
-	return s3Client
+
+	return s3Client, sess
 }
 
 // https://github.com/nitisht/cookbook/blob/master/docs/aws-sdk-for-go-with-minio.md
@@ -100,9 +104,9 @@ func (b *Bucket) initClient() {
 	case "LOCAL":
 		fallthrough
 	case "DOCKER":
-		b.client = minio_client(b)
+		b.client, b.session = minio_client(b)
 	default:
-		b.client = s3_client(b)
+		b.client, b.session = s3_client(b)
 	}
 }
 
@@ -137,30 +141,111 @@ func (b *Bucket) CreateBucket() {
 	}
 }
 
-func (b *Bucket) ListObjects() {
+func (b *Bucket) ListObjects(filter string) []*s3.Object {
 	resp, err := b.client.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(b.Name)})
 	if err != nil {
 		log.Println(err)
 		log.Fatal("COULD NOT LIST OBJECTS IN BUCKET ", b.Endpoint, b.Name)
 	}
+
+	keys := make([]*s3.Object, 0)
+
 	for _, item := range resp.Contents {
 		log.Println("Name:         ", *item.Key)
 		log.Println("Last modified:", *item.LastModified)
 		log.Println("Size:         ", *item.Size)
 		log.Println("Storage class:", *item.StorageClass)
 		log.Println("")
+		if found, _ := regexp.MatchString(filter, *item.Key); found {
+			keys = append(keys, item)
+		}
+	}
+	return keys
+}
+
+func get_mime_type(path string) string {
+	m := map[string]string{
+		"json":    "application/json",
+		"txt":     "text/plain",
+		"md":      "text/plain",
+		"pdf":     "application/pdf",
+		"sqlite":  "application/x-sqlite3",
+		"sqlite3": "application/x-sqlite3",
+	}
+	for k, v := range m {
+		if bytes.HasSuffix([]byte(path), []byte(k)) {
+			return v
+		}
+	}
+	return m["json"]
+}
+
+// https://github.com/nitisht/cookbook/blob/master/docs/aws-sdk-for-go-with-minio.md
+func (b *Bucket) PutObject(path []string, object []byte) {
+	key := strings.Join(path, "/")
+
+	log.Printf("storing object at %s", key)
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/s3#PutObjectInput
+	_, err := b.client.PutObject(&s3.PutObjectInput{
+		Body:        bytes.NewReader(object),
+		Bucket:      &b.Name,
+		Key:         aws.String(key),
+		ContentType: aws.String(get_mime_type(path[len(path)-1])),
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
-func (b *Bucket) PutObject(path []string, object []byte) {
-	key := strings.Join(path, "/")
-	log.Printf("storing object at %s", key)
-	_, err := b.client.PutObject(&s3.PutObjectInput{
-		Body:   bytes.NewReader(object),
-		Bucket: &b.Name,
+func (b *Bucket) GetObject(key string) []byte {
+
+	log.Printf("getting object at %s", key)
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/s3#GetObjectInput
+	goo, err := b.client.GetObject(&s3.GetObjectInput{
+		Bucket: aws.String(b.Name),
 		Key:    aws.String(key),
 	})
 	if err != nil {
+		log.Fatal(err)
+	}
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/s3#GetObjectOutput
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(goo.Body)
+	defer goo.Body.Close()
+
+	return buf.Bytes()
+}
+
+func (b *Bucket) UploadFile(path []string, filename string) {
+	key := strings.Join(path, "/")
+
+	log.Printf("uploading file to %s", key)
+
+	// Create an uploader with the session and custom options
+	uploader := s3manager.NewUploader(b.session, func(u *s3manager.Uploader) {
+		u.PartSize = 5 * 1024 * 1024 // The minimum/default allowed part size is 5MB
+		u.Concurrency = 5            // default
+	})
+
+	//open the file
+	f, err := os.Open(filename)
+	if err != nil {
+		fmt.Printf("failed to open file %q, %v", filename, err)
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	// Upload the file to S3.
+	_, err = uploader.Upload(&s3manager.UploadInput{
+		Bucket:      aws.String(b.Name),
+		Key:         aws.String(key),
+		Body:        f,
+		ContentType: aws.String(get_mime_type(path[len(path)-1])),
+	})
+
+	//in case it fails to upload
+	if err != nil {
+		log.Printf("failed to upload file, %v", err)
 		log.Fatal(err)
 	}
 }
