@@ -49,11 +49,18 @@ To run searches
 http POST http://localhost:8484/search/example.com terms="something or other"
 ```
 
+or visit
 
-(base) jadudm@jade:six$ docker run --rm -v $PWD:/tmp aldanial/cloc --exclude-dir=static .
-github.com/AlDanial/cloc v 2.02  T=0.01 s (5261.0 files/s, 284802.8 lines/s)
+[http://localhost:8484/static/](http://localhost:8484/static/)
+
+after you load your content.
+
 
 ```
+six$ docker run --rm -v $PWD:/tmp aldanial/cloc --exclude-dir=static .
+github.com/AlDanial/cloc v 2.02  T=0.01 s (5261.0 files/s, 284802.8 lines/s)
+
+
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
