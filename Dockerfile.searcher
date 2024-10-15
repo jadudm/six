@@ -17,6 +17,6 @@ RUN make container_build
 RUN cp /app/pkg/dyndb/schema.sql /app/cmd/searcher/schema.sql
 RUN chmod 755 /app/cmd/searcher/run.sh
 
-CMD ["/app/cmd/packer/run.sh"]
+CMD ["/app/cmd/searcher/run.sh"]
 
 
