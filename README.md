@@ -5,8 +5,35 @@ Exploration number six.
 # building
 
 ```
-docker build
+docker compose up --build
 ```
+
+# running
+
+To crawl a site
+
+```
+http PUT http://localhost:8080/enqueue/CRAWL host=example.com path=/
+```
+
+To pack the site that was crawled
+
+```
+http PUT http://localhost:8080/enqueue/PACK host=example.com
+```
+
+To move it to the searcher
+
+```
+http PUT http://localhost:8080/enqueue/SEARCH host=example.com
+```
+
+To run searches
+
+```
+http POST http://localhost:8484/search/example.com search-terms="something or other"
+```
+
 
 (base) jadudm@jade:six$ docker run --rm -v $PWD:/tmp aldanial/cloc .
 github.com/AlDanial/cloc v 2.02  T=0.01 s (5261.0 files/s, 284802.8 lines/s)
