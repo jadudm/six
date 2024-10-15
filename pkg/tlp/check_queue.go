@@ -28,7 +28,7 @@ func CheckQueue(vcap_services *vcap.VcapServices, queue string, crontab string, 
 		resp, err := client.R().
 			EnableTrace().
 			Get(fmt.Sprintf("%s/dequeue/%s", endpoint, queue))
-		log.Println(resp)
+		//log.Println(resp)
 		if err == nil {
 			rmap := gtst.BytesToMap(resp.Body())
 			if rmap["result"] == nil || rmap["result"].(string) == "error" {

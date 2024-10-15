@@ -19,8 +19,8 @@ services:
     # https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
     healthcheck:
       test: curl --fail http://localhost:8080/ping || exit 1
-      interval: 3s
-      timeout: 12s
+      interval: 60s
+      timeout: 180s
       retries: 3
       start_period: 60s
     environment:
@@ -50,8 +50,8 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:8181/ping || exit 1
-      interval: 3s
-      timeout: 12s
+      interval: 60s
+      timeout: 180s
       retries: 3
       start_period: 60s
     environment:
@@ -81,8 +81,8 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:8282/ping || exit 1
-      interval: 3s
-      timeout: 12s
+      interval: 60s
+      timeout: 180s
       retries: 3
       start_period: 60s
     environment:
@@ -112,8 +112,8 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:8383/ping || exit 1
-      interval: 3s
-      timeout: 12s
+      interval: 60s
+      timeout: 180s
       retries: 3
       start_period: 60s
     environment:
@@ -143,8 +143,8 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://searcher:8484/ping || exit 1
-      interval: 3s
-      timeout: 12s
+      interval: 60s
+      timeout: 180s
       retries: 3
       start_period: 60s
     environment:
