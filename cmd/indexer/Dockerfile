@@ -6,10 +6,10 @@ FROM jadud/builder
 # FIXME: /home/vcap/app to mirror deploy
 WORKDIR /app
 COPY . .
-WORKDIR /app/cmd/indexer
+WORKDIR /app/cmd/scraper
 RUN make container_build
-RUN chmod 755 /app/cmd/indexer/run.sh
+RUN chmod 755 /app/cmd/scraper/run.sh
 
-CMD ["/app/cmd/indexer/run.sh"]
+CMD ["/app/cmd/scraper/run.sh"]
 
 

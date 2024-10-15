@@ -27,15 +27,15 @@ services:
       ENV: "DOCKER"
 
   #-----------------------------------------------------
-  # indexer
+  # scraper
   #-----------------------------------------------------
-  indexer:
-    container_name: indexer
+  scraper:
+    container_name: scraper
     image: six/dev
     build: 
       context: .
-      dockerfile: ./cmd/indexer/Dockerfile
-    entrypoint: /home/vcap/app/cmd/indexer/run-fast.sh
+      dockerfile: ./cmd/scraper/Dockerfile
+    entrypoint: /home/vcap/app/cmd/scraper/run-fast.sh
     volumes:
       - type: bind
         source: .

@@ -31,7 +31,7 @@ func load_dotenv() {
 	}
 }
 
-func index_pdf() {
+func scrape_pdf() {
 	// domain, path, page_number, text
 }
 

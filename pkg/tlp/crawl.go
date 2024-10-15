@@ -171,9 +171,9 @@ func Crawl(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan
 						u, _ := url.Parse(link)
 						m["host"] = u.Host
 						m["path"] = u.Path
-						// The crawler both crawls and queues pages for indexing.
+						// The crawler both crawls and queues pages for scraping.
 						qs.Enqueue("CRAWL", gtst.MapToBytes(m))
-						qs.Enqueue("INDEX", gtst.MapToBytes(m))
+						qs.Enqueue("SCRAPE", gtst.MapToBytes(m))
 					} else {
 						log.Printf("CRAWLER cache hit[%s]\n", link)
 					}

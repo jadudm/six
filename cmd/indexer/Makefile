@@ -1,8 +1,8 @@
 build: container_build
-	mv indexer.exe ../../bin/indexer.exe
+	mv scraper.exe ../../bin/scraper.exe
 
 container_build:
-	go build -buildvcs=false -o indexer.exe
+	go build -buildvcs=false -o scraper.exe
 
 test:
 	go test
@@ -12,9 +12,3 @@ run:
 
 check:
 	staticcheck
-
-# Migrations
-up:
-	dbmate -u "sqlite:_ignore/crawler.sqlite" up
-down:
-	dbmate -u "sqlite:_ignore/crawler.sqlite" down

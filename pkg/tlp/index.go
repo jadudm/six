@@ -18,7 +18,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func index_sel(sel *goquery.Selection) string {
+func scrape_sel(sel *goquery.Selection) string {
 	content := ""
 	txt := sel.Text()
 	if len(txt) > 0 {
@@ -35,7 +35,7 @@ func index_sel(sel *goquery.Selection) string {
 // move to content pkg
 func fetch_html_content(url string) string {
 	client := resty.New()
-	log.Println("INDEXER Fetching", url)
+	log.Println("SCRAPER Fetching", url)
 	resp, err := client.R().Get(url)
 	if err != nil {
 		log.Println(err)
@@ -50,13 +50,13 @@ func fetch_html_content(url string) string {
 	}
 
 	doc.Find("p").Each(func(ndx int, sel *goquery.Selection) {
-		content += index_sel(sel)
+		content += scrape_sel(sel)
 	})
 	doc.Find("li").Each(func(ndx int, sel *goquery.Selection) {
-		content += index_sel(sel)
+		content += scrape_sel(sel)
 	})
 	doc.Find("td").Each(func(ndx int, sel *goquery.Selection) {
-		content += index_sel(sel)
+		content += scrape_sel(sel)
 	})
 
 	return content
@@ -64,11 +64,11 @@ func fetch_html_content(url string) string {
 
 // mv to object storage
 func store_to_s3(b *obj.Bucket, m map[string]interface{}) {
-	log.Println("INDEXER Storing to S3", m["host"])
+	log.Println("SCRAPER Storing to S3", m["host"])
 	log.Println(m["content"])
 	// Base the filename on the current timestamp.
 	// Not UUID : uuid.NewString() + ".json"
-	path := []string{"indexed", m["host"].(string), m["indexed-on"].(string) + "-" + uuid.NewString() + ".json"}
+	path := []string{"scraped", m["host"].(string), m["scraped-on"].(string) + "-" + uuid.NewString() + ".json"}
 	b.PutObject(path, gtst.MapToBytes(m))
 }
 
@@ -78,7 +78,7 @@ func get(msg gtst.JSON, key string) string {
 	return gjson.GetBytes(msg, key).String()
 }
 
-func Index(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan gtst.JSON) {
+func Scrape(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan gtst.JSON) {
 	qs := queueing.NewQueueServer("queue-server", vcap_services)
 	for {
 		msg := <-ch_msg
@@ -95,7 +95,7 @@ func Index(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan
 			m["content"] = content
 			// FIXME We truncate to the hour.
 			// https://gigi.nullneuron.net/gigilabs/golang-timestamps-a-cross-platform-nightmare/
-			m["indexed-on"] = fmt.Sprint(time.Now().Truncate(time.Hour).Unix())
+			m["scraped-on"] = fmt.Sprint(time.Now().Truncate(time.Hour).Unix())
 			store_to_s3(&buckets.Ephemeral, m)
 
 		} else if strings.Contains(content_type, "pdf") {

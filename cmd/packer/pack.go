@@ -55,7 +55,7 @@ func pack_full(buckets *obj.Buckets, m map[string]interface{}) {
 		log.Fatal(err)
 	}
 
-	objects := ephemeral_b.ListObjects("indexed/" + host)
+	objects := ephemeral_b.ListObjects("scraped/" + host)
 	for _, o := range objects {
 		json_b := ephemeral_b.GetObject(*o.Key)
 		jsm := gtst.BytesToMap(json_b)

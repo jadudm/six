@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SERVICE=indexer
+export SERVICE=scraper
 export VCAP_SERVICES=$(cat /home/vcap/app/vcap.json)
 
 

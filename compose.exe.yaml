@@ -23,13 +23,13 @@ services:
       ENV: "DOCKER"
 
   #-----------------------------------------------------
-  # indexer
+  # scraper
   #-----------------------------------------------------
-  indexer:
+  scraper:
     build: 
       context: .
-      dockerfile: ./cmd/indexer/Dockerfile
-    container_name: indexer
+      dockerfile: ./cmd/scraper/Dockerfile
+    container_name: scraper
     ports:
       - 8181:8181
     # https://docs.docker.com/compose/how-tos/startup-order/

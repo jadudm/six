@@ -35,7 +35,7 @@ func main() {
 
 	if len(os.Getenv("VCAP_SERVICES")) < 30 {
 		log.Println("export VCAP_SERVICES=$(cat /app/vcap.json)")
-		log.Fatal("Set VCAP_SERVICES to run the indexer. Exiting.")
+		log.Fatal("Set VCAP_SERVICES to run the scraper. Exiting.")
 	}
 	vcap_services := vcap.ReadVCAPConfig()
 

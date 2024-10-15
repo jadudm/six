@@ -16,18 +16,18 @@
             }
         },
         {
-            "label": "indexer",
-            "name": "indexer",
+            "label": "scraper",
+            "name": "scraper",
             "tags": [],
             "instance_guid": "UUIDBRAVO1",
-            "instance_name": "indexer",
+            "instance_name": "scraper",
             "binding_guid": "UUIDBRAVO2",
             "binding_name": null,
             "credentials": {
                 "port": 8181,
-                "host": "indexer",
+                "host": "scraper",
                 "scheme": "http",
-                "endpoint": "http://indexer:8181"
+                "endpoint": "http://scraper:8181"
             }
         },
         {

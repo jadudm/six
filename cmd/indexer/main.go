@@ -12,7 +12,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func run_indexer(vcap_services *vcap.VcapServices) {
+func run_scraper(vcap_services *vcap.VcapServices) {
 
 	ch_a := make(chan gsts.JSON)
 	ch_b := make(chan gsts.JSON)
@@ -22,10 +22,10 @@ func run_indexer(vcap_services *vcap.VcapServices) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	go tlp.CheckQueue(vcap_services, "INDEX", "@every 1m", ch_a)
+	go tlp.CheckQueue(vcap_services, "SCRAPE", "@every 1m", ch_a)
 	// HeadCheck eats anything that doesn't return a 200
 	go tlp.HeadCheck(ch_a, ch_b)
-	go tlp.Index(vcap_services, buckets, ch_b)
+	go tlp.Scrape(vcap_services, buckets, ch_b)
 
 	wg.Wait()
 
@@ -35,7 +35,7 @@ func main() {
 
 	if len(os.Getenv("VCAP_SERVICES")) < 30 {
 		log.Println("export VCAP_SERVICES=$(cat /app/vcap.json)")
-		log.Fatal("Set VCAP_SERVICES to run the indexer. Exiting.")
+		log.Fatal("Set VCAP_SERVICES to run the scraper. Exiting.")
 	}
 	vcap_services := vcap.ReadVCAPConfig()
 
@@ -44,10 +44,10 @@ func main() {
 
 	log.Println("running healthcheck")
 	r := chi.NewRouter()
-	go tlp.HealthCheck("indexer", vcap_services, r)
+	go tlp.HealthCheck("scraper", vcap_services, r)
 
-	log.Println("running indexer")
-	go run_indexer(vcap_services)
+	log.Println("running scraper")
+	go run_scraper(vcap_services)
 	wg.Wait()
 
 	log.Println("we will never see this")

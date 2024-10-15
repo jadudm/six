@@ -34,4 +34,4 @@ export VCAP_SERVICES=$(cat /app/vcap.json)
 #     /minio/mc mb minnie/${eb_bucket}
 # done
 
-./indexer.exe
+./scraper.exe

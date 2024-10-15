@@ -1,8 +1,12 @@
 # six
 
-Exploration number six.
+*Exploration number six in SQLite-based hackery.*
 
-# to run/build quickly/incrementally
+"What does a distributed crawler/indexer/search engine look like?"
+
+## I just want to run the thing
+
+To run/build quickly/incrementally
 
 This does a `run *.go` on the directories, instead of full container builds.
 
@@ -12,12 +16,23 @@ Build the base image
 docker build -t six/dev -f Dockerfile.builder .
 ```
 
+Run the stack. Individual components will be `go run *go`'d.
+
 ```
 docker compose up
 ```
 
+# What hath thou wrought?
 
-# run/build statically
+While it may look a bit early 2000's, I wondered what the core of a distributed/decoupled search infrastructure might look like.
+
+I wanted a crawler that was decoupled (via FIFO queues) from the scraper, which in turn was decoupled from the system that would turn the scraped content into a database.
+
+
+
+# Other build notes
+
+To run/build statically (meaning, each container contains a full binary build, and executes those)...
 
 ```
 docker compose -f compose.exe.yaml up --build

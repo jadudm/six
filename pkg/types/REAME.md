@@ -25,22 +25,22 @@ sequenceDiagram
     C->>Q: <index+crawl site.gov>
 ```
 
-## indexers
+## scrapers
 
-Indexers pick up two kinds of messages: `index` and `index+crawl` messages.
+Scrapers pick up two kinds of messages: `index` and `index+crawl` messages.
 
-The indexer is responsible for fetching the content, converting it to text, and caching that text in S3. Every time an indexer receives a page, it queues a message to reset the timer on this site. When the site settles down for <timeout> minutes, we will queue a database update.
+The scraper is responsible for fetching the content, converting it to text, and caching that text in S3. Every time an scraper receives a page, it queues a message to reset the timer on this site. When the site settles down for <timeout> minutes, we will queue a database update.
 
 Ultimately, a Packer is responsible for turning the cached S3 data into an SQLite database.
 
 ### `index+crawl`
 
-When an `index+crawl` message is found, it is unpacked into two messages, `index` and `crawl`, respectively. An indexer/crawler will then pick up the respective messages. It also starts a timer, queueing a `pack_full` callback when the work is done.
+When an `index+crawl` message is found, it is unpacked into two messages, `index` and `crawl`, respectively. An scraper/crawler will then pick up the respective messages. It also starts a timer, queueing a `pack_full` callback when the work is done.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant I as Indexer
+    participant I as Scraper
     participant IQ as IndexQueue
     participant CQ as CrawlQueue
     participant TQ as TimerQueue
@@ -61,8 +61,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    participant I as Indexer
-    participant IQ as IndexQueue
+    participant I as Scraper
+    participant IQ as ScrapeQueue
     participant TQ as TimerQueue
     I->>IQ: Get message
     activate IQ
@@ -84,7 +84,7 @@ Crawlers fetch content (typically HTML) and look for links. Any links found that
 
 We assume, when crawling, that we are also indexing; there is no point in crawling *without* indexing, as that would just be traversing the site (without storing/building an index).
 
-Crawling does not queue updates to the timer. We let the indexer do that. (We *could* add timer tickling to the crawler, but it seems redundant.)
+Crawling does not queue updates to the timer. We let the scraper do that. (We *could* add timer tickling to the crawler, but it seems redundant.)
 
 ### `crawl`
 
@@ -93,7 +93,7 @@ sequenceDiagram
     autonumber
     participant C as Crawler
     participant CQ as CrawlQueue
-    participant IQ as IndexQueue
+    participant IQ as ScrapeQueue
     C->>CQ: Get message
     activate CQ
     CQ->>C: <crawl site.gov>
@@ -102,7 +102,7 @@ sequenceDiagram
     C->WWW: Fetch site.gov
     Note right of C: Pull links out of page
     C->>CQ: <crawl site.gov :path link>
-    C->>IQ: <index site.gov :path link>
+    C->>IQ: <scrape site.gov :path link>
     deactivate C
 ```
 
