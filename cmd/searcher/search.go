@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"io"
 	"log"
 	"math"
@@ -12,8 +11,6 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-
-	sqlitezstd "github.com/jtarchie/sqlitezstd"
 
 	queueing "com.jadud.search.six/cmd/queue-server/pkg/queueing"
 	"com.jadud.search.six/cmd/searcher/mdb"
@@ -145,15 +142,16 @@ func search_handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetupSearchRoutes(r *chi.Mux) {
-	SetupSearchRoutes(r)
 	r.Post("/search/{host}", search_handler)
 }
 
 func ServeSearch(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_in <-chan []string, r *chi.Mux) {
-	initErr := sqlitezstd.Init()
-	if initErr != nil {
-		panic(fmt.Sprintf("Failed to initialize SQLiteZSTD: %s", initErr))
-	}
+	//initErr := sqlitezstd.Init()
+	// if initErr != nil {
+	// 	panic(fmt.Sprintf("Failed to initialize SQLiteZSTD: %s", initErr))
+	// }
+	SetupSearchRoutes(r)
+
 	for {
 		csf := <-ch_in
 		log.Println("SEARCH now serving", csf)
