@@ -30,9 +30,9 @@ func run_searcher(vcap_services *vcap.VcapServices, r *chi.Mux) {
 	go tlp.CheckQueue(vcap_services, "SEARCH", "@every 1m", ch_a)
 	// HeadCheck eats anything that doesn't return a 200
 	go tlp.HeadCheck(ch_a, ch_b)
-	go tlp.CopyDatabases(vcap_services, buckets, ch_b, ch_c)
+	go CopyDatabases(vcap_services, buckets, ch_b, ch_c)
 	// ch_c is the list of databases copied in.
-	go tlp.ServeSearch(vcap_services, buckets, ch_c, r)
+	go ServeSearch(vcap_services, buckets, ch_c, r)
 
 	wg.Wait()
 

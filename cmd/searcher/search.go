@@ -1,4 +1,4 @@
-package tlp
+package main
 
 import (
 	"context"
@@ -16,9 +16,10 @@ import (
 	sqlitezstd "github.com/jtarchie/sqlitezstd"
 
 	queueing "com.jadud.search.six/cmd/queue-server/pkg/queueing"
-	"com.jadud.search.six/pkg/dyndb/mdb"
+	"com.jadud.search.six/cmd/searcher/mdb"
 	sack "com.jadud.search.six/pkg/knapsack"
 	obj "com.jadud.search.six/pkg/object-storage"
+	tlp "com.jadud.search.six/pkg/tlp"
 	gtst "com.jadud.search.six/pkg/types"
 	"com.jadud.search.six/pkg/vcap"
 	"github.com/go-chi/chi"
@@ -144,6 +145,7 @@ func search_handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetupSearchRoutes(r *chi.Mux) {
+	SetupSearchRoutes(r)
 	r.Post("/search/{host}", search_handler)
 }
 
@@ -197,7 +199,7 @@ func CopyDatabases(vcap_services *vcap.VcapServices,
 				// It wasn't for us.
 				// Backoff and try again
 				retries += 1
-				sleep_duration += CalculateBackoff(retries, initialBackoff, maxBackoff)
+				sleep_duration += tlp.CalculateBackoff(retries, initialBackoff, maxBackoff)
 				if sleep_duration > time.Duration(max_sleep) {
 					// If we get here, we've slept for a long time, and no one has picked up
 					// this message. This suggests either a wrong ID, or something bad has happened.

@@ -11,7 +11,6 @@ import (
 )
 
 func HealthCheck(instance_name string, vcap_services *vcap.VcapServices, r *chi.Mux) {
-	SetupSearchRoutes(r)
 
 	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("pong"))

@@ -1,4 +1,4 @@
-package tlp
+package main
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"com.jadud.search.six/pkg/dyndb/mdb"
+	mdb "com.jadud.search.six/cmd/packer/mdb"
 	obj "com.jadud.search.six/pkg/object-storage"
 	gtst "com.jadud.search.six/pkg/types"
 	"com.jadud.search.six/pkg/vcap"

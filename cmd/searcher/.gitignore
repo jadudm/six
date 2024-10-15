@@ -2,3 +2,6 @@
 *.sqlite
 *.exe
 schema.sql
+sqlc.yaml
+queries.sql
+mdb

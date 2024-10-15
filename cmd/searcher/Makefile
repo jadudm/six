@@ -17,5 +17,7 @@ check:
 
 generate:
 	rm -f schema.sql
-	cd ../../pkg/dyndb ; sqlc generate
-	cp ../../pkg/dyndb/schema.sql .
+	cp ../../pkg/dyndb/schema.sql . 
+	cp ../../pkg/dyndb/queries.sql . 
+	cp ../../pkg/dyndb/sqlc.yaml . 
+	sqlc generate
