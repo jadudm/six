@@ -43,7 +43,7 @@
                 "host": "crawler",
                 "scheme": "http",
                 "endpoint": "http://crawler:8282",
-                "cache-ttl-minutes": 2,
+                "cache-ttl-minutes": 600,
                 "cache-ttl-seconds": 0
             }
         },
@@ -75,7 +75,7 @@
                 "host": "localhost",
                 "scheme": "http",
                 "endpoint": "http://searcher:8484",
-                "local-disk-limit": 5
+                "local-disk-limit": 50
             }
         }
     ],

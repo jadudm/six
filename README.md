@@ -2,10 +2,25 @@
 
 Exploration number six.
 
-# building
+# to run/build quickly/incrementally
+
+This does a `run *.go` on the directories, instead of full container builds.
+
+Build the base image
 
 ```
-docker compose up --build
+docker build -t six/dev -f Dockerfile.builder .
+```
+
+```
+docker compose up
+```
+
+
+# run/build statically
+
+```
+docker compose -f compose.exe.yaml up --build
 ```
 
 # running

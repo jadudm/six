@@ -1,34 +1,19 @@
-# Settings and configurations that are common for all containers
-x-minio-common: &minio-common
-  image: quay.io/minio/minio:RELEASE.2024-10-13T13-34-11Z
-  command: server /data --console-address ":9001" 
-  expose:
-    - "9000"
-    - "9001"
-  ports:
-    - 9000:9000
-    - 9001:9001
-  environment:
-    MINIO_ROOT_USER: nutnutnut
-    MINIO_ROOT_PASSWORD: nutnutnut
-  healthcheck:
-    test: ["CMD", "mc", "ready", "local"]
-    interval: 5s
-    timeout: 5s
-    retries: 5
-
 services:
 
   #-----------------------------------------------------
   # queue-server
   #-----------------------------------------------------
   queue-server:
+    container_name: queue-server
+    image: six/dev
     build: 
       context: .
-      dockerfile: Dockerfile.queue-server
-    container_name: queue-server
+      dockerfile: ./cmd/queue-server/Dockerfile.queue-server
+    entrypoint: /home/vcap/app/cmd/queue-server/run-fast.sh
     volumes:
-      - ./volumes/queue-server:/bin/queue-server
+      - type: bind
+        source: .
+        target: /app
     ports:
       - 8080:8080
     # https://medium.com/@saklani1408/configuring-healthcheck-in-docker-compose-3fa6439ee280
@@ -45,10 +30,16 @@ services:
   # indexer
   #-----------------------------------------------------
   indexer:
+    container_name: indexer
+    image: six/dev
     build: 
       context: .
-      dockerfile: Dockerfile.indexer
-    container_name: indexer
+      dockerfile: ./cmd/indexer/Dockerfile.indexer
+    entrypoint: /home/vcap/app/cmd/indexer/run-fast.sh
+    volumes:
+      - type: bind
+        source: .
+        target: /app
     ports:
       - 8181:8181
     # https://docs.docker.com/compose/how-tos/startup-order/
@@ -70,10 +61,16 @@ services:
   # crawler
   #-----------------------------------------------------
   crawler:
+    container_name: crawler
+    image: six/dev
     build: 
       context: .
-      dockerfile: Dockerfile.crawler
-    container_name: crawler
+      dockerfile: ./cmd/crawler/Dockerfile.crawler
+    entrypoint: /home/vcap/app/cmd/crawler/run-fast.sh
+    volumes:
+      - type: bind
+        source: .
+        target: /app
     ports:
       - 8282:8282
     # https://docs.docker.com/compose/how-tos/startup-order/
@@ -95,10 +92,16 @@ services:
   # packer
   #-----------------------------------------------------
   packer:
+    container_name: packer
+    image: six/dev
     build: 
       context: .
-      dockerfile: Dockerfile.packer
-    container_name: packer
+      dockerfile: ./cmd/packer/Dockerfile.packer
+    entrypoint: /home/vcap/app/cmd/packer/run-fast.sh
+    volumes:
+      - type: bind
+        source: .
+        target: /app
     ports:
       - 8383:8383
     # https://docs.docker.com/compose/how-tos/startup-order/
@@ -120,10 +123,16 @@ services:
   # searcher
   #-----------------------------------------------------
   searcher:
+    container_name: searcher
+    image: six/dev
     build: 
       context: .
-      dockerfile: Dockerfile.searcher
-    container_name: searcher
+      dockerfile: ./cmd/searcher/Dockerfile.searcher
+    entrypoint: /home/vcap/app/cmd/searcher/run-fast.sh
+    volumes:
+      - type: bind
+        source: .
+        target: /app
     ports:
       - 8484:8484
     # https://docs.docker.com/compose/how-tos/startup-order/
@@ -142,16 +151,27 @@ services:
       ENV: "DOCKER"
     restart: always
 
-    
-
-
-
   #-----------------------------------------------------
   # minio
   #-----------------------------------------------------
   minio:
-    <<: *minio-common
     hostname: minio
+    image: quay.io/minio/minio:RELEASE.2024-10-13T13-34-11Z
+    command: server /data --console-address ":9001" 
+    expose:
+      - "9000"
+      - "9001"
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: nutnutnut
+      MINIO_ROOT_PASSWORD: nutnutnut
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - data:/data
 volumes:

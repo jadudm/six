@@ -1,2 +1,4 @@
 *.zstd
 *.sqlite
+*.exe
+schema.sql

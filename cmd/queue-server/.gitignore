@@ -1,3 +1,4 @@
 db/*sqlite
 db/schema.sql
 .env
+*.exe

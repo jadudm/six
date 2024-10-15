@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # This runs in the container context only.
 export VCAP_SERVICES=$(cat /app/vcap.json)

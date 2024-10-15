@@ -1,12 +1,13 @@
 #!/bin/bash
 
 all () {
-local host="$1"
-http PUT http://localhost:8080/enqueue/CRAWL host=${host} path=/
-sleep 10m
-http PUT http://localhost:8080/enqueue/PACK host=${host} type=pack_full
-sleep 10m
-http PUT http://localhost:8080/enqueue/SEARCH host=${host} type=search search-id=searcher
+    local host="$1"
+    http PUT http://localhost:8080/enqueue/CRAWL host=${host} path=/
+    sleep 10m
+    http PUT http://localhost:8080/enqueue/PACK host=${host} type=pack_full
+    sleep 10m
+    http PUT http://localhost:8080/enqueue/SEARCH host=${host} type=search search-id=searcher
+    sleep 10m
 }
 
 all jadud.com
