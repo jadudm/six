@@ -76,7 +76,7 @@ func search_handler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 		log.Println(string(msg))
-		search_terms := gjson.GetBytes(msg, "search-terms").String()
+		search_terms := gjson.GetBytes(msg, "terms").String()
 		log.Println(search_terms)
 
 		// Search DB
@@ -129,7 +129,9 @@ func search_handler(w http.ResponseWriter, r *http.Request) {
 
 		res, err := queries.SearchHtmlIndexSnippets(ctx, terms)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("QUERY ERROR", err)
+			duration := time.Since(start)
+			render.DefaultResponder(w, r, render.M{"result": "err", "elapsed": duration, "results": err})
 		}
 
 		duration := time.Since(start)

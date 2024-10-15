@@ -236,7 +236,8 @@ func (b *Bucket) DownloadFile(path []string, filename string) {
 			Key:    aws.String(key),
 		})
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("failed to download file %s, %s\n", aws.String(key), filename)
+		log.Fatal(err)
 	}
 	if numBytes == 0 {
 		log.Printf("DownloadFile: %s -> %s was 0 bytes\n", key, filename)

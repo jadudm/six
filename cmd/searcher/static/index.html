@@ -1,0 +1,221 @@
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/x-icon" href="/static/assets/img/favicons/icon_logo.svg" />
+        <link rel="stylesheet" href="/static/assets/css/uswds.css" media="all" type="text/css">
+    </head>        
+    <body>
+    <a class="usa-skipnav" href="#main-content">Skip to main content</a>
+    <div class="usa-overlay"></div>
+    <div class="usa-section">
+      <div class="grid-container">
+        <div class="grid-row grid-gap">
+          <div
+            class="usa-layout-docs__sidenav display-none desktop:display-block desktop:grid-col-3"
+          >
+            <nav aria-label="Secondary navigation">
+              <ul class="usa-sidenav">
+                <li class="usa-sidenav__item">
+                  <a href="javascript:void(0);">Parent link</a>
+                </li>
+                <li class="usa-sidenav__item">
+                  <a href="javascript:void(0);" class="usa-current"
+                    >Current page</a
+                  >
+                  <ul class="usa-sidenav__sublist">
+                    <li class="usa-sidenav__item">
+                      <a href="javascript:void(0);">Child link</a>
+                    </li>
+                    <li class="usa-sidenav__item">
+                      <a href="javascript:void(0);" class="usa-current"
+                        >Child link</a
+                      >
+                      <ul class="usa-sidenav__sublist">
+                        <li class="usa-sidenav__item">
+                          <a href="javascript:void(0);">Grandchild link</a>
+                        </li>
+                        <li class="usa-sidenav__item">
+                          <a href="javascript:void(0);" class="usa-current"
+                            >Grandchild link</a
+                          >
+                        </li>
+                        <li class="usa-sidenav__item">
+                          <a href="javascript:void(0);">Grandchild link</a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li class="usa-sidenav__item">
+                      <a href="javascript:void(0);">Child link</a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="usa-sidenav__item">
+                  <a href="javascript:void(0);">Parent link</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+          <main class="desktop:grid-col-9 usa-prose" id="main-content">
+            <h1>Search some things</h1>
+            <p class="usa-intro">
+                This is a search engine in 2000 lines of code.
+            </p>
+            
+            <section aria-label="Big search component">
+               
+
+                    <label class="usa-label" for="fruit">Select a site</label>
+                    <div class="usa-combo-box">
+                      <select class="usa-select" name="fruit" id="six-site">
+                        <option value>Select a site</option>
+                        <option value="jadud.com">jadud.com</option>
+                        <option value="www.fac.gov">www.fac.gov</option>
+                        <option value="www.cloud.gov">www.cloud.gov</option>
+
+                        </select>
+                    </div>
+                <br/>
+                
+                <label class="usa-sr-only" for="search-field-en-big">Search</label>
+                <input
+                class="usa-input"
+                id="six-search"
+                type="six-search"
+                name="six-search"
+                />
+                <br/>
+                <button class="usa-button" id="six-button" >
+                <span class="usa-search__submit-text">Search</span
+                ><img
+                    src="/assets/img/usa-icons-bg/search--white.svg"
+                    class="usa-search__submit-icon"
+                    alt="Search"
+                />
+                </button>
+                
+                <ol id="six-list">
+                </ol>
+            </section>
+          </main>
+        </div>
+
+
+        <script>
+            document.getElementById("six-button").onclick = function (){
+            console.log("YOU CLICKED ME!");
+            // https://stackoverflow.com/questions/24468459/sending-a-json-to-server-and-retrieving-a-json-in-return-without-jquery
+            // Sending and receiving data in JSON format using POST method
+            // http POST http://localhost:8484/search/www.cloud.gov terms="python cloud foundry developers"
+
+            let site = document.getElementById("six-site");
+            console.log(site.value);
+            // https://stackoverflow.com/questions/11563638/how-do-i-get-the-value-of-text-input-field-using-javascript
+            
+            var url = "http://localhost:8484/search/" + site.value;
+            console.log(url);
+
+            var query = document.getElementById('six-search').value
+            console.log(query);
+
+            const data = {"terms": query}
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(userData => {
+                    // Process the retrieved user data
+                    console.log('User Data:', userData);
+                    document.getElementById("six-list").innerHTML = "";
+
+                    var list = document.getElementById('six-list');
+                    console.log(list);
+                    for(var k in userData.results) {
+                        // console.log(k, userData.results[k]);
+                        var r = userData.results[k];
+                        console.log(r)
+                        console.log(r.snippet)
+                        var entry = document.createElement('li');
+                        var h = "<a href='https://" + site.value + r.path + "' target='_blank'>" + r.path + "</a>" 
+                        h += "<br/>" + r.snippet
+                        entry.innerHTML = h
+                        list.appendChild(entry);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            };
+            
+                
+        </script>
+
+        <div class="usa-layout-docs__sidenav desktop:display-none">
+          <nav aria-label="Secondary navigation">
+            <ul class="usa-sidenav">
+              <li class="usa-sidenav__item">
+                <a href="javascript:void(0);">Parent link</a>
+              </li>
+              <li class="usa-sidenav__item">
+                <a href="javascript:void(0);" class="usa-current">Current page</a>
+                <ul class="usa-sidenav__sublist">
+                  <li class="usa-sidenav__item">
+                    <a href="javascript:void(0);">Child link</a>
+                  </li>
+                  <li class="usa-sidenav__item">
+                    <a href="javascript:void(0);" class="usa-current"
+                      >Child link</a
+                    >
+                    <ul class="usa-sidenav__sublist">
+                      <li class="usa-sidenav__item">
+                        <a href="javascript:void(0);">Grandchild link</a>
+                      </li>
+                      <li class="usa-sidenav__item">
+                        <a href="javascript:void(0);" class="usa-current"
+                          >Grandchild link</a
+                        >
+                      </li>
+                      <li class="usa-sidenav__item">
+                        <a href="javascript:void(0);">Grandchild link</a>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="usa-sidenav__item">
+                    <a href="javascript:void(0);">Child link</a>
+                  </li>
+                </ul>
+              </li>
+              <li class="usa-sidenav__item">
+                <a href="javascript:void(0);">Parent link</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <div class="usa-identifier">
+      <section
+        class="usa-identifier__section usa-identifier__section--usagov"
+        aria-label="U.S. government information and services"
+      >
+        <div class="usa-identifier__container">
+          <div class="usa-identifier__usagov-description">
+            Looking for U.S. government information and services?
+          </div>
+          <a href="https://www.usa.gov/" class="usa-link">Visit USA.gov</a>
+        </div>
+      </section>
+    </div>
+    </body>
+</html>

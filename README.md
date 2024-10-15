@@ -19,13 +19,13 @@ http PUT http://localhost:8080/enqueue/CRAWL host=example.com path=/
 To pack the site that was crawled
 
 ```
-http PUT http://localhost:8080/enqueue/PACK host=example.com
+http PUT http://localhost:8080/enqueue/PACK host=example.com type=pack_full
 ```
 
 To move it to the searcher
 
 ```
-http PUT http://localhost:8080/enqueue/SEARCH host=example.com
+http PUT http://localhost:8080/enqueue/SEARCH host=example.com type=search search-id=searcher
 ```
 
 To run searches
