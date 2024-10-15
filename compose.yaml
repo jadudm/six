@@ -34,7 +34,7 @@ services:
     image: six/dev
     build: 
       context: .
-      dockerfile: ./cmd/indexer/Dockerfile.indexer
+      dockerfile: ./cmd/indexer/Dockerfile
     entrypoint: /home/vcap/app/cmd/indexer/run-fast.sh
     volumes:
       - type: bind
@@ -65,7 +65,7 @@ services:
     image: six/dev
     build: 
       context: .
-      dockerfile: ./cmd/crawler/Dockerfile.crawler
+      dockerfile: ./cmd/crawler/Dockerfile
     entrypoint: /home/vcap/app/cmd/crawler/run-fast.sh
     volumes:
       - type: bind
@@ -96,7 +96,7 @@ services:
     image: six/dev
     build: 
       context: .
-      dockerfile: ./cmd/packer/Dockerfile.packer
+      dockerfile: ./cmd/packer/Dockerfile
     entrypoint: /home/vcap/app/cmd/packer/run-fast.sh
     volumes:
       - type: bind
@@ -127,7 +127,7 @@ services:
     image: six/dev
     build: 
       context: .
-      dockerfile: ./cmd/searcher/Dockerfile.searcher
+      dockerfile: ./cmd/searcher/Dockerfile
     entrypoint: /home/vcap/app/cmd/searcher/run-fast.sh
     volumes:
       - type: bind

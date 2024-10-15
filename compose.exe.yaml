@@ -6,7 +6,7 @@ services:
   queue-server:
     build: 
       context: .
-      dockerfile: ./cmd/queue-server/Dockerfile.queue-server      
+      dockerfile: ./cmd/queue-server/Dockerfile
     container_name: queue-server
     volumes:
       - ./volumes/queue-server:/bin/queue-server
@@ -28,7 +28,7 @@ services:
   indexer:
     build: 
       context: .
-      dockerfile: ./cmd/indexer/Dockerfile.indexer
+      dockerfile: ./cmd/indexer/Dockerfile
     container_name: indexer
     ports:
       - 8181:8181
@@ -53,7 +53,7 @@ services:
   crawler:
     build: 
       context: .
-      dockerfile: ./cmd/crawler/Dockerfile.crawler
+      dockerfile: ./cmd/crawler/Dockerfile
     container_name: crawler
     ports:
       - 8282:8282
@@ -78,7 +78,7 @@ services:
   packer:
     build: 
       context: .
-      dockerfile: ./cmd/packer/Dockerfile.packer
+      dockerfile: ./cmd/packer/Dockerfile
     container_name: packer
     ports:
       - 8383:8383
@@ -103,7 +103,7 @@ services:
   searcher:
     build: 
       context: .
-      dockerfile: ./cmd/searcher/Dockerfile.searcher
+      dockerfile: ./cmd/searcher/Dockerfile
     container_name: searcher
     ports:
       - 8484:8484
