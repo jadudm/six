@@ -71,7 +71,7 @@ func is_crawlable(host *url.URL, link string) (string, error) {
 	// This could be revisited, as it is expensive.
 	// Do we still have garbage?
 	if !bytes.HasSuffix([]byte(lu.String()), []byte("https")) {
-		return "", errors.New("cralewr: link does not start with https")
+		return "", errors.New("crawler: link does not start with https")
 	}
 	// Is it pure whitespace?
 	if len(strings.Replace(lu.String(), " ", "", -1)) < 5 {
@@ -150,6 +150,7 @@ func Crawl(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan
 		msg := <-ch_msg
 		m := gtst.BytesToMap(msg)
 		content_type := get(msg, "content-type")
+
 		if strings.Contains(content_type, "html") {
 			// log.Println("crawler found html")
 			u, _ := url.Parse("https://" + get(msg, "host") + get(msg, "path"))

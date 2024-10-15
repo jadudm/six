@@ -11,22 +11,22 @@ import (
 )
 
 // Broken out for testing.
-func putEnqueueHandler(queue string, job JSON) {
+func putEnqueueHandler(queue string, msg JSON) {
 	//log.Println("Queueing", domain)
 	// It is polite to ask for a new queue.
 	// The library will protect us if we don't.
 	Q.NewQueue(queue)
-	Q.Enqueue(queue, job)
+	Q.Enqueue(queue, msg)
 }
 
 func PutEnqueueHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	queue := chi.URLParam(r, "queue")
-	body, err := io.ReadAll(r.Body)
+	msg, err := io.ReadAll(r.Body)
 	if err != nil {
 		panic("COULD NOT READ BODY")
 	}
-	putEnqueueHandler(queue, body)
+	putEnqueueHandler(queue, msg)
 	duration := time.Since(start)
-	render.DefaultResponder(w, r, render.M{"result": "ok", "elapsed": duration})
+	render.DefaultResponder(w, r, render.M{"result": "ok", "elapsed": duration, "msg": string(msg)})
 }

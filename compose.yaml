@@ -91,6 +91,57 @@ services:
     environment:
       ENV: "DOCKER"
 
+  #-----------------------------------------------------
+  # packer
+  #-----------------------------------------------------
+  packer:
+    build: 
+      context: .
+      dockerfile: Dockerfile.packer
+    container_name: packer
+    ports:
+      - 8383:8383
+    # https://docs.docker.com/compose/how-tos/startup-order/
+    depends_on:
+      minio:
+        condition: service_healthy
+      queue-server:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail http://localhost:8383/ping || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    environment:
+      ENV: "DOCKER"
+
+  #-----------------------------------------------------
+  # searcher
+  #-----------------------------------------------------
+  searcher:
+    build: 
+      context: .
+      dockerfile: Dockerfile.searcher
+    container_name: searcher
+    ports:
+      - 8484:8484
+    # https://docs.docker.com/compose/how-tos/startup-order/
+    depends_on:
+      minio:
+        condition: service_healthy
+      queue-server:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail http://searcher:8484/ping || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    environment:
+      ENV: "DOCKER"
+
+
 
   #-----------------------------------------------------
   # minio

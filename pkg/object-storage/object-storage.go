@@ -156,6 +156,8 @@ func (b *Bucket) ListObjects(filter string) []*s3.Object {
 		log.Println("Size:         ", *item.Size)
 		log.Println("Storage class:", *item.StorageClass)
 		log.Println("")
+
+		log.Printf("CHECKING OBJECT %s against filter %s\n", *item.Key, filter)
 		if found, _ := regexp.MatchString(filter, *item.Key); found {
 			keys = append(keys, item)
 		}
@@ -171,6 +173,8 @@ func get_mime_type(path string) string {
 		"pdf":     "application/pdf",
 		"sqlite":  "application/x-sqlite3",
 		"sqlite3": "application/x-sqlite3",
+		// https://www.iana.org/assignments/media-types/application/zstd
+		"zstd": "application/zstd",
 	}
 	for k, v := range m {
 		if bytes.HasSuffix([]byte(path), []byte(k)) {
@@ -214,6 +218,29 @@ func (b *Bucket) GetObject(key string) []byte {
 	defer goo.Body.Close()
 
 	return buf.Bytes()
+}
+
+func (b *Bucket) DownloadFile(path []string, filename string) {
+	key := strings.Join(path, "/")
+
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	downloader := s3manager.NewDownloader(b.session)
+	numBytes, err := downloader.Download(file,
+		&s3.GetObjectInput{
+			Bucket: aws.String(b.Name),
+			Key:    aws.String(key),
+		})
+	if err != nil {
+		fmt.Println(err)
+	}
+	if numBytes == 0 {
+		log.Printf("DownloadFile: %s -> %s was 0 bytes\n", key, filename)
+	}
 }
 
 func (b *Bucket) UploadFile(path []string, filename string) {

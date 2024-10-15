@@ -59,9 +59,23 @@
                 "port": 8383,
                 "host": "localhost",
                 "scheme": "http",
-                "endpoint": "http://localhost:8383",
-                "cache-ttl-minutes": 10,
-                "cache-ttl-seconds": 0
+                "endpoint": "http://localhost:8383"
+            }
+        },
+        {
+            "label": "searcher",
+            "name": "searcher",
+            "tags": [],
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "searcher",
+            "binding_guid": "UUIDBRAVO2",
+            "binding_name": null,
+            "credentials": {
+                "port": 8484,
+                "host": "localhost",
+                "scheme": "http",
+                "endpoint": "http://localhost:8484",
+                "local-disk-limit": 5
             }
         }
     ],

@@ -9,6 +9,7 @@ import (
 	tlp "com.jadud.search.six/pkg/tlp"
 	gsts "com.jadud.search.six/pkg/types"
 	vcap "com.jadud.search.six/pkg/vcap"
+	"github.com/go-chi/chi"
 )
 
 func run_indexer(vcap_services *vcap.VcapServices) {
@@ -42,7 +43,8 @@ func main() {
 	wg.Add(1)
 
 	log.Println("running healthcheck")
-	go tlp.HealthCheck("indexer", vcap_services)
+	r := chi.NewRouter()
+	go tlp.HealthCheck("indexer", vcap_services, r)
 
 	log.Println("running indexer")
 	go run_indexer(vcap_services)

@@ -7,3 +7,4 @@ sql:
       go:
         package: "mdb"
         out: "mdb"
+        emit_json_tags: true

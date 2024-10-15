@@ -31,11 +31,12 @@ func GetDequeueHandler(w http.ResponseWriter, r *http.Request) {
 	duration := time.Since(start)
 	if err == nil {
 		gr := gjson.ParseBytes(msg)
+		m := gtst.BytesToMap(msg)
 		sendMap := make(render.M, 0)
 		sendMap["result"] = "ok"
 		sendMap["elapsed"] = duration
-		for _, key := range []string{"host", "path", "type"} {
-			sendMap[key] = gr.Get(key).String()
+		for k := range m {
+			sendMap[k] = gr.Get(k).String()
 		}
 		render.DefaultResponder(w, r, sendMap)
 	} else {

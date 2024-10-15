@@ -46,6 +46,37 @@
                 "cache-ttl-minutes": 2,
                 "cache-ttl-seconds": 0
             }
+        },
+        {
+            "label": "packer",
+            "name": "packer",
+            "tags": [],
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "packer",
+            "binding_guid": "UUIDBRAVO2",
+            "binding_name": null,
+            "credentials": {
+                "port": 8383,
+                "host": "packer",
+                "scheme": "http",
+                "endpoint": "http://packer:8383"
+            }
+        },
+        {
+            "label": "searcher",
+            "name": "searcher",
+            "tags": [],
+            "instance_guid": "UUIDBRAVO1",
+            "instance_name": "searcher",
+            "binding_guid": "UUIDBRAVO2",
+            "binding_name": null,
+            "credentials": {
+                "port": 8484,
+                "host": "localhost",
+                "scheme": "http",
+                "endpoint": "http://searcher:8484",
+                "local-disk-limit": 5
+            }
         }
     ],
     "s3": [

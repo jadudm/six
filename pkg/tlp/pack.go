@@ -3,6 +3,7 @@ package tlp
 import (
 	"context"
 	"database/sql"
+	"io"
 	"log"
 	"os"
 
@@ -10,6 +11,7 @@ import (
 	obj "com.jadud.search.six/pkg/object-storage"
 	gtst "com.jadud.search.six/pkg/types"
 	"com.jadud.search.six/pkg/vcap"
+	"github.com/klauspost/compress/zstd"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -35,6 +37,7 @@ func pack_full(buckets *obj.Buckets, m map[string]interface{}) {
 
 	sqlite_filename := host + ".sqlite"
 	_ = os.Remove(sqlite_filename)
+
 	db, err := sql.Open("sqlite3", sqlite_filename)
 	if err != nil {
 		log.Fatal(err)
@@ -75,12 +78,37 @@ func pack_full(buckets *obj.Buckets, m map[string]interface{}) {
 
 }
 
-func copy_db(buckets *obj.Buckets, m map[string]interface{}) {
+// https://pkg.go.dev/github.com/klauspost/compress/zstd#section-readme
+func compress(in io.Reader, out io.Writer) error {
+	enc, err := zstd.NewWriter(out)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = io.Copy(enc, in)
+	if err != nil {
+		enc.Close()
+		log.Fatal(err)
+	}
+	return enc.Close()
+}
+
+func copy_db_to_s3(buckets *obj.Buckets, m map[string]interface{}) {
 	databases_b := buckets.Databases
 	host := m["host"].(string)
 	sqlite_filename := host + ".sqlite"
-	key_path := []string{"packed", sqlite_filename}
+	compressed_filename := sqlite_filename + ".zstd"
+	//FIXME catch these
+	in_reader, _ := os.Open(sqlite_filename)
+	out_writer, _ := os.Create(compressed_filename)
+	compress(in_reader, out_writer)
+	in_reader.Close()
+	out_writer.Close()
+	key_path := []string{"sqlite", sqlite_filename}
 	databases_b.UploadFile(key_path, sqlite_filename)
+	key_path = []string{"zstd", compressed_filename}
+	databases_b.UploadFile(key_path, compressed_filename)
+	os.Remove(sqlite_filename)
+	os.Remove(compressed_filename)
 }
 
 func Pack(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan gtst.JSON) {
@@ -96,7 +124,7 @@ func Pack(vcap_services *vcap.VcapServices, buckets *obj.Buckets, ch_msg <-chan 
 		if m["result"] != nil && m["result"] != "error" {
 			if m["type"] == "pack_full" {
 				pack_full(buckets, m)
-				copy_db(buckets, m)
+				copy_db_to_s3(buckets, m)
 			}
 		}
 	}
