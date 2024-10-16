@@ -75,7 +75,7 @@ func pack_full(buckets *obj.Buckets, m map[string]interface{}) {
 		}
 		log.Println("PACKER INSERTED", inserted)
 	}
-
+	// FIXME : Delete the objects when we are done.
 }
 
 // https://pkg.go.dev/github.com/klauspost/compress/zstd#section-readme
