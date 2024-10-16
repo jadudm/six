@@ -1,4 +1,4 @@
-package tlp
+package main
 
 import (
 	"bytes"

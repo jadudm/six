@@ -25,7 +25,7 @@ func run_scraper(vcap_services *vcap.VcapServices) {
 	go tlp.CheckQueue(vcap_services, "SCRAPE", "@every 1m", ch_a)
 	// HeadCheck eats anything that doesn't return a 200
 	go tlp.HeadCheck(ch_a, ch_b)
-	go tlp.Scrape(vcap_services, buckets, ch_b)
+	go Scrape(vcap_services, buckets, ch_b)
 
 	wg.Wait()
 
