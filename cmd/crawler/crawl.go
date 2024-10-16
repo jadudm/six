@@ -1,4 +1,4 @@
-package tlp
+package main
 
 import (
 	"bytes"
@@ -16,6 +16,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	cache "github.com/go-pkgz/expirable-cache/v3"
 	"github.com/go-resty/resty/v2"
+	"github.com/tidwall/gjson"
 )
 
 func trimSuffix(s, suffix string) string {
@@ -129,6 +130,12 @@ func fetch_links(host *url.URL, url string) []string {
 		links[ndx] = trimSuffix(link, "/")
 	}
 	return links
+}
+
+// mv to types
+// also split from pkg to internal -- only things to share ext. should be in pkg
+func get(msg gtst.JSON, key string) string {
+	return gjson.GetBytes(msg, key).String()
 }
 
 func get_ttl(vcap_services *vcap.VcapServices) int64 {
